@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.security.PublicKey;
 
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
@@ -31,9 +32,17 @@ public class Certificat {
                 BigInteger.ONE,
                 startDate,
                 endDate,
-                new X500Name("CN=" + name),
+                new X500Name("CN=" + name),//We set the subject of the certfifcat
                 subPubKeyInfo
         );
+        AlgorithmIdentifier sigAlg = algFinder.find(ALG_NAME);
+        AlgorithmIdentifier digAlg = new DefaultDigestAlgorithmIdentifierFinder().
+                find(sigAlg);
+
+        ContentSigner signer = new BcECDSAContentSignerBuilder(sigAlg, digAlg).
+                build(caKey);
+
+        return certBldr.build(signer);
         ContentSigner signer = new BcECDSAContentSignerBuilder(sigAlg, digAlg).build(key.privKey());
         X509CertificateHolder certHolder = v1CertGen.build(signer);
         try {
