@@ -44,4 +44,8 @@ public class Equipement {
     public Certificat maCertif() {
         return monCert;
     }
+
+    public void run() {
+        //Run the Equipement
+    }
 }
