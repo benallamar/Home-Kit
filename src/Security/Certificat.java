@@ -1,18 +1,25 @@
 package Security;
 
+import java.math.BigInteger;
+import java.security.PublicKey;
+
 import org.bouncycastle.jce.provider.X509CertificateObject;
-import org.bouncycastle.util.BigIntegers;
+
 
 /**
  * Created by bubble on 05/10/2016.
  */
 public class Certificat {
-    static private BigIntegers seqnum = BigIntegers.Zero;
+    static private BigInteger seqnum = BigInteger.ZERO;
     public X509CertificateObject x509;
-    Certificat(){
+
+    Certificat() {
 
     }
-    public boolean verifiCerif(PublicKey publicKey){
+
+    public boolean verifiCerif(PublicKey publicKey) {
         // return True, if the certificat is valid
+        return false;
+
     }
 }
