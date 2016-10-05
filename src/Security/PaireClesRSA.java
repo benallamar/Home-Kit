@@ -1,10 +1,6 @@
 package Security;
 
-import java.security.SecureRandom;
-import java.security.KeyPairGenerator;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.security.PrivateKey;
+import java.security.*;
 
 /**
  * Created by bubble on 04/10/2016.
@@ -12,12 +8,17 @@ import java.security.PrivateKey;
 public class PaireClesRSA {
     private KeyPair key;
 
-    PaireClesRSA(int length) {
+    public PaireClesRSA(int length) {
+        try {
+            // Genertate the RSA Key
+            SecureRandom rand = new SecureRandom();
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+            kpg.initialize(length, rand);
+            key = kpg.generateKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            System.out.print("No recognized algorithm");
+        }
         // We have to use the bouncy castle to generate the keys
-        SecureRandom rand = new SecureRandom();
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-        kpg.initialize(512, rand);
-        key = kpg.generateKeyPair();
     }
 
     public PublicKey pubKey() {

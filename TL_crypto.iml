@@ -7,5 +7,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="docs1" level="project" />
+    <orderEntry type="library" name="pgdocs1" level="project" />
+    <orderEntry type="library" name="pkixdocs1" level="project" />
+    <orderEntry type="library" name="bcpg-jdk15on-153" level="project" />
   </component>
 </module>

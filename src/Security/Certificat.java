@@ -14,7 +14,7 @@ public class Certificat {
     public X509CertificateObject x509;
 
     Certificat() {
-
+        //We have to genertate the certi
     }
 
     public boolean verifiCerif(PublicKey publicKey) {
