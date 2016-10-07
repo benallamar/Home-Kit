@@ -8,7 +8,7 @@ import java.security.PublicKey;
 /**
  * Project Name : TL_crypto
  */
-public class Equipement {
+public class Equipement extends Soc{
     private PaireClesRSA maCle;
     private Certificat monCert;
     private String monNom;
@@ -18,10 +18,11 @@ public class Equipement {
         // Define the component
         monNom = name;
         monPort = port;
+        monCert = new Certificat();
     }
 
     public void affichage_da() {
-
+        //What do you mean by da
     }
 
     public void affichage_ca() {

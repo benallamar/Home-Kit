@@ -11,6 +11,7 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 import java.security.cert.CertificateParsingException;
 import java.util.Date;
@@ -27,7 +28,7 @@ public class Certificat {
         SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(key.pubKey().getEncoded());
         Date startDate = new Date(System.currentTimeMillis());
         Date endDate = new Date(System.currentTimeMillis() + validityDays * 24 * 60 * 60 * 1000);
-        X509v3CertificateBuilder v1CertGen = new X509v3CertificateBuilder(
+        X509v3CertificateBuilder CertGen = new X509v3CertificateBuilder(
                 new X500Name("CN=" + name),
                 BigInteger.ONE,
                 startDate,
@@ -35,21 +36,12 @@ public class Certificat {
                 new X500Name("CN=" + name),//We set the subject of the certfifcat
                 subPubKeyInfo
         );
-        AlgorithmIdentifier sigAlg = algFinder.find(ALG_NAME);
-        AlgorithmIdentifier digAlg = new DefaultDigestAlgorithmIdentifierFinder().
-                find(sigAlg);
-
-        ContentSigner signer = new BcECDSAContentSignerBuilder(sigAlg, digAlg).
-                build(caKey);
-
-        return certBldr.build(signer);
-        ContentSigner signer = new BcECDSAContentSignerBuilder(sigAlg, digAlg).build(key.privKey());
-        X509CertificateHolder certHolder = v1CertGen.build(signer);
+        ContentSigner sigGen = new JcaContentSignerBuilder("SHA1withRSA").setProvider("BC").build(key.privKey());
+        X509CertificateHolder certHolder = CertGen.build(sigGen);
         try {
-            x509 = new X509CertificateObject(v1CertGen);
-
+            x509 = new X509CertificateObject(CertGen);
         } catch (CertificateParsingException e) {
-            System.out.print("Error, we have some error in parsing your certificat, could please try letter");
+            System.out.print("Certificate Parse Failed");
         }
     }
 
