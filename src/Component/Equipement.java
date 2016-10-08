@@ -5,26 +5,30 @@ import Security.Certificat;
 import Security.PaireClesRSA;
 
 import java.security.PublicKey;
+import java.util.HashSet;
 
 /**
  * Project Name : TL_crypto
  */
-public class Equipement extends Server {
+public class Equipement implements Server {
     private PaireClesRSA maCle;
     private Certificat monCert;
     private String monNom;
-    private Equipement parent = null, child = null;
-    private Boolean client_mode;
+    private Equipement parent = null;
+    private HashSet<Equipement> childs = new HashSet<Equipement>();
 
-    Equipement(String name, int port) {
+    public Equipement(String name, int port) {
         // Define the component
         monNom = name;
-        monPort = port;
-        monCert = new Certificat();
+        this.port = port;
+        maCle = new PaireClesRSA(1024);
     }
 
     public void affichage_da() {
-        child.affichage();
+        for (Equipement child : childs) {
+            child.affichage();
+
+        }
     }
 
     public void affichage_ca() {
@@ -43,6 +47,29 @@ public class Equipement extends Server {
     public PublicKey maClePub() {
         // Return the publicKe
         return monCert.getPublicKey();
+    }
+
+    public Equipement setCertificateForChild(Equipement childComponent) {
+        childComponent
+                .setMonCert(new Certificat(monNom, maCle, 365)) //Create the certificate
+                .setParent(this);//Add to Parent
+        this.addChildComp(childComponent);
+        return this;
+    }
+
+    public Equipement addChildComp(Equipement childComponent) {
+        childs.add(childComponent);
+        return this;
+    }
+
+    public Equipement setParent(Equipement parentComponent) {
+        parent = parentComponent;
+        return this;
+    }
+
+    public Equipement setMonCert(Certificat cert) {
+        monCert = cert;
+        return this;
     }
 
     public Certificat maCertif() {

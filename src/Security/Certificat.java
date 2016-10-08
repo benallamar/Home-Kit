@@ -1,6 +1,5 @@
 package Security;
 
-import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.PublicKey;
 
@@ -49,6 +48,6 @@ public class Certificat {
     }
 
     public PublicKey getPublicKey() {
-
+        return (PublicKey) x509.getSubjectPublicKeyInfo().getPublicKeyData();
     }
 }

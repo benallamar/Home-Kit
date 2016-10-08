@@ -6,7 +6,7 @@ public class Main {
         //PaireClesRSA doubl_key = new PaireClesRSA(512);
         //System.out.print(doubl_key.privKey().getEncoded());
         //System.out.print(BigInteger.ZERO);
-        Equipement radio = new Equipement("x_Fridge", 12);
-        radio.run();
+        Equipement radio = new Equipement("x_Fridge", 3000);
+        radio.run(true);
     }
 }
