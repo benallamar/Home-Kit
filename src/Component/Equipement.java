@@ -1,5 +1,6 @@
 package Component;
 
+import Connection.Server;
 import Security.Certificat;
 import Security.PaireClesRSA;
 
@@ -8,11 +9,12 @@ import java.security.PublicKey;
 /**
  * Project Name : TL_crypto
  */
-public class Equipement extends Soc{
+public class Equipement extends Server {
     private PaireClesRSA maCle;
     private Certificat monCert;
     private String monNom;
-    private int monPort;
+    private Equipement parent = null, child = null;
+    private Boolean client_mode;
 
     Equipement(String name, int port) {
         // Define the component
@@ -22,15 +24,16 @@ public class Equipement extends Soc{
     }
 
     public void affichage_da() {
-        //What do you mean by da
+        child.affichage();
     }
 
     public void affichage_ca() {
-
+        parent.affichage();
     }
 
     public void affichage() {
-
+        String message = "Component: " + monNom;
+        System.out.println(message);
     }
 
     public String monNom() {
@@ -39,14 +42,16 @@ public class Equipement extends Soc{
 
     public PublicKey maClePub() {
         // Return the publicKe
-        return null;
+        return monCert.getPublicKey();
     }
 
     public Certificat maCertif() {
         return monCert;
     }
 
-    public void run() {
-        //Run the Equipement
+    public String toString() {
+        String description = "";
+        description += "";
+        return description;
     }
 }
