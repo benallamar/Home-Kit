@@ -10,12 +10,13 @@ import java.util.HashSet;
 /**
  * Project Name : TL_crypto
  */
-public class Equipement implements Server {
+public class Equipement {
     private PaireClesRSA maCle;
     private Certificat monCert;
     private String monNom;
     private Equipement parent = null;
     private HashSet<Equipement> childs = new HashSet<Equipement>();
+    private int port;
 
     public Equipement(String name, int port) {
         // Define the component
