@@ -27,6 +27,8 @@ public class Server extends IOOperation {
                 socket = server.accept();
                 System.out.println(read());
                 write("Thank you for your solution");
+                System.out.println(read());
+                write("Thank you for your solution");
                 socket.close();
             }
 

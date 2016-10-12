@@ -24,6 +24,8 @@ public class Client extends IOOperation implements Runnable {
         try {
             write("Nice to see you working");
             System.out.println(read());
+            write("Nice to see you working");
+            System.out.println(read());
             closeSocket();
         } catch (IOException e) {
             System.out.println("Error 2" + e.getMessage());
@@ -39,9 +41,7 @@ public class Client extends IOOperation implements Runnable {
 
 
     public static void main(String[] args) {
-        while (true) {
-            new Client("localhost", 3000).run();
-        }
+        new Client("localhost", 3000).run();
     }
 
     public void closeSocket() throws IOException {

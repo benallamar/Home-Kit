@@ -13,22 +13,26 @@ import java.util.HashSet;
 public class Equipement {
     private PaireClesRSA maCle;
     private Certificat monCert;
-    private String monNom;
+    private String name;
     private Equipement parent = null;
     private HashSet<Equipement> childs = new HashSet<Equipement>();
     private int port;
+    private Server server = null;
 
     public Equipement(String name, int port) {
         // Define the component
-        monNom = name;
+        this.name = name;
         this.port = port;
         maCle = new PaireClesRSA(1024);
+    }
+
+    public boolean isEqual(String name) {
+        return this.name == name;
     }
 
     public void affichage_da() {
         for (Equipement child : childs) {
             child.affichage();
-
         }
     }
 
@@ -37,12 +41,12 @@ public class Equipement {
     }
 
     public void affichage() {
-        String message = "Component: " + monNom;
+        String message = "Component: " + name;
         System.out.println(message);
     }
 
-    public String monNom() {
-        return monNom;
+    public String name() {
+        return name;
     }
 
     public PublicKey maClePub() {
@@ -52,7 +56,7 @@ public class Equipement {
 
     public Equipement setCertificateForChild(Equipement childComponent) {
         childComponent
-                .setMonCert(new Certificat(monNom, maCle, 365)) //Create the certificate
+                .setMonCert(new Certificat(name, maCle, 365)) //Create the certificate
                 .setParent(this);//Add to Parent
         this.addChildComp(childComponent);
         return this;
@@ -81,5 +85,12 @@ public class Equipement {
         String description = "";
         description += "";
         return description;
+    }
+
+    public void run(HashSet<Equipement> systemComponent) {
+        //Here We have to establish the communication with the other component
+        server = new Server(port);
+
+
     }
 }
