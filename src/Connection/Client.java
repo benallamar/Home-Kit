@@ -1,9 +1,7 @@
 package Connection;
 
-import Component.Equipement;
 
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
@@ -29,7 +27,10 @@ public class Client extends IOOperation implements Runnable {
             closeSocket();
         } catch (IOException e) {
             System.out.println("Error 2" + e.getMessage());
-        } catch (ClassNotFoundException e) {
+        } catch (
+                ClassNotFoundException e)
+
+        {
             System.out.println("Error 3" + e.getMessage());
         }
 
@@ -38,8 +39,9 @@ public class Client extends IOOperation implements Runnable {
 
 
     public static void main(String[] args) {
-        Client radio = new Client("local_host", 3000);
-        radio.run();
+        while (true) {
+            new Client("localhost", 3000).run();
+        }
     }
 
     public void closeSocket() throws IOException {

@@ -12,5 +12,6 @@
     <orderEntry type="library" name="pkixdocs1" level="project" />
     <orderEntry type="library" name="bcpg-jdk15on-153" level="project" />
     <orderEntry type="library" name="bcprov-jdk15on-155" level="project" />
+    <orderEntry type="library" name="com.google.code.gson:gson:2.7" level="project" />
   </component>
 </module>
