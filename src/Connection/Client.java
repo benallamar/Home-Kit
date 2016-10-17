@@ -9,7 +9,7 @@ import java.net.Socket;
  */
 public class Client extends IOOperation implements Runnable {
 
-    public Client(String hostName, int port) {
+    public Client(String hostName, short port) {
         try {
             socket = new Socket(hostName, port);
         } catch (IOException e) {

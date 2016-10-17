@@ -16,10 +16,10 @@ public class Equipement {
     private String name;
     private Equipement parent = null;
     private HashSet<Equipement> childs = new HashSet<Equipement>();
-    private int port;
+    private short port;
     private Server server = null;
 
-    public Equipement(String name, int port) {
+    public Equipement(String name, short port) {
         // Define the component
         this.name = name;
         this.port = port;

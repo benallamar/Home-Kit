@@ -9,10 +9,10 @@ import java.net.Socket;
  */
 public class Server extends IOOperation {
     private boolean isServerMode = false;
-    protected int port = 12345;
+    protected short port = 12345;
     protected ServerSocket server = null;
 
-    public Server(int port) {
+    public Server(short port) {
         try {
             server = new ServerSocket(port);
 

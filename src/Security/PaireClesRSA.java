@@ -16,7 +16,7 @@ public class PaireClesRSA {
             kpg.initialize(length, rand);
             key = kpg.generateKeyPair();
         } catch (NoSuchAlgorithmException e) {
-            System.out.print("No recognized algorithm");
+            System.out.prshort("No recognized algorithm");
         }
         // We have to use the bouncy castle to generate the keys
     }
