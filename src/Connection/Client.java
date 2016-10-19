@@ -36,13 +36,15 @@ public class Client extends IOOperation implements Runnable {
             if (request.isSuccess()) {
                 switch (request.getOption()) {
                     case 1:
-                        print("Connection");
+                        print("Certificat Delivrance ...");
+                        acceptConnection(request, response);
                         write(request);
                         break;
                     default:
-                        print("Unknow option");
-                        socket.close();
+                        print("Connection refused");
                 }
+            } else {
+                print("Error on the server");
             }
 
             socket.close();
@@ -79,7 +81,17 @@ public class Client extends IOOperation implements Runnable {
         return true;
     }
 
-    public
+
+    public boolean acceptConnection(SocketBody request, SocketBody response) {
+        //Set the response ...
+        response.setOption(2);
+
+        //Instantiate the body
+        HashMap<String, String> body = new HashMap<String, String>();
+
+        //We generate the certificat for the user ...
+        body.put("certificat", "Some Certificat");
+    }
 
     public static void main(String[] args) {
 
