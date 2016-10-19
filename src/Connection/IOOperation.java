@@ -1,29 +1,40 @@
 package Connection;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+
+import Console.JSONParser;
+import Security.Certificat;
+import Security.PaireClesRSA;
 
 /**
  * Project Name : TL_crypto
  */
-public abstract class IOOperation {
+public abstract class IOOperation extends Thread {
     public Socket socket = null;
+    protected ServerSocket server = null;
+    protected PaireClesRSA maCle;
+    protected Certificat monCert;
+    protected String name;
 
-
-    public void write(String stringText) throws IOException, ClassNotFoundException {
+    public void write(SocketBody response) throws IOException, ClassNotFoundException {
         OutputStream os = socket.getOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(os);
-        oos.writeObject(stringText);
+        oos.writeObject(JSONParser.serialize(response));
         oos.flush();
-        //os.close();
     }
 
-    public String read() throws IOException, ClassNotFoundException {
+    public SocketBody read() throws IOException, ClassNotFoundException {
         InputStream is = socket.getInputStream();
         ObjectInputStream ois = new ObjectInputStream(is);
-        String message = (String) ois.readObject();
-        //ois.close();
-        //is.close();
-        return message;
+        return JSONParser.deserialize((String) ois.readObject());
     }
+
+    public void print(String string) {
+        System.out.println(string);
+    }
+
+
 }

@@ -1,3 +1,6 @@
 {
-  "name": "The name of the component"
+  "name": "x_5",
+  "type": "DVD",
+  "port": "12334",
+  "parent_type": "A_A"
 }
