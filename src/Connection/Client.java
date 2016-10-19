@@ -81,6 +81,7 @@ public class Client extends IOOperation implements Runnable {
         return true;
     }
 
+
     public boolean acceptConnection(SocketBody request, SocketBody response) {
         //Set the response ...
         response.setOption(2);
@@ -89,7 +90,7 @@ public class Client extends IOOperation implements Runnable {
         HashMap<String, String> body = new HashMap<String, String>();
 
         //We generate the certificat for the user ...
-        body.put("certificat","Some Certificat");
+        body.put("certificat", "Some Certificat");
     }
 
     public static void main(String[] args) {
