@@ -10,20 +10,15 @@ import java.util.HashSet;
 /**
  * Project Name : TL_crypto
  */
-public class Equipement {
-    private PaireClesRSA maCle;
-    private Certificat monCert;
-    private String name;
+public class Equipement extends Server {
     private Equipement parent = null;
     private HashSet<Equipement> childs = new HashSet<Equipement>();
-    private short port;
-    private Server server = null;
+    private int port;
 
-    public Equipement(String name, short port) {
+    public Equipement(String name, int port) {
         // Define the component
+        super(port);
         this.name = name;
-        this.port = port;
-        maCle = new PaireClesRSA(1024);
     }
 
     public boolean isEqual(String name) {
@@ -89,8 +84,10 @@ public class Equipement {
 
     public void run(HashSet<Equipement> systemComponent) {
         //Here We have to establish the communication with the other component
-        server = new Server(port);
-
-
+        if (parent == null) {
+            // we have to run the equipement as a client who is looking for a server to connect with
+        } else {
+            super.run();
+        }
     }
 }
