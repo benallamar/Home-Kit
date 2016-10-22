@@ -19,17 +19,24 @@ public abstract class IOOperation extends Thread {
     protected Certificat monCert;
     protected String name;
 
+    // @over
     public void write(SocketBody response) throws IOException, ClassNotFoundException {
         OutputStream os = socket.getOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(os);
-        oos.writeObject(JSONParser.serialize(response));
+        //We have to cypher the message before we send it.
+        //TODO: Add the PGP Protocol
+        String encryptedMessage = JSONParser.serialize(response);
+        oos.writeObject(encryptedMessage);
         oos.flush();
     }
 
     public SocketBody read() throws IOException, ClassNotFoundException {
         InputStream is = socket.getInputStream();
         ObjectInputStream ois = new ObjectInputStream(is);
-        return JSONParser.deserialize((String) ois.readObject());
+        //We have to decypher the gotten message
+        //TODO : Add the PGP protocol here
+        String decryptedMessage = (String) ois.readObject();
+        return JSONParser.deserialize(decryptedMessage);
     }
 
     public void print(String string) {

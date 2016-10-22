@@ -73,7 +73,4 @@ public class Certificat {
         return (PublicKey) x509.getSubjectPublicKeyInfo().getPublicKeyData();
     }
 
-    public static serialize() {
-
-    }
 }

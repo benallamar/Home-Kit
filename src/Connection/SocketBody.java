@@ -8,18 +8,22 @@ import java.util.HashMap;
 public final class SocketBody {
     private int status = 200;
     private int option = 1;
-    private HashMap<String, String> body = new HashMap<String, String>();
+    private HashMap<String, Object> body = new HashMap<String, Object>();
 
     public boolean isSuccess() {
         return status == 200;
     }
 
-    public HashMap<String, String> getBody() {
+    public HashMap<String, Object> getBody() {
         return body;
     }
 
-    public void setBody(HashMap<String, String> body) {
+    public void setBody(HashMap<String, Object> body) {
         this.body = body;
+    }
+
+    public Object getKey(String key) {
+        return body.get(key);
     }
 
     public int getOption() {
