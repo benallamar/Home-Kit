@@ -16,6 +16,7 @@ public class Client extends IOOperation implements Runnable {
         try {
             socket = new Socket(hostName, port);
             maCle = new PaireClesRSA(1024);
+            name = "String";
 
         } catch (IOException e) {
             System.out.println("Error 1" + e.getMessage());
@@ -39,6 +40,7 @@ public class Client extends IOOperation implements Runnable {
                         print("Certificat Delivrance ...");
                         acceptConnection(request, response);
                         write(request);
+                        print("connection has been established between the two component");
                         break;
                     default:
                         print("Connection refused");
@@ -66,13 +68,11 @@ public class Client extends IOOperation implements Runnable {
         response.setOption(1);
 
         //Instantiate the body of our request.
-        HashMap<String, String> body = new HashMap<String, String>();
+        response.setBody(new HashMap<String, Object>());
 
         //We have to send the certificate to the server so he could create for as a kind of certificate
-        body.put("public_key", maCle.pubKey().toString());
-        body.put("name", name);
-        //Set the body to the request
-        response.setBody(body);
+        response.getBody().put("public_key", maCle.serialize());
+        response.getBody().put("name", name);
 
         //Set that the operation has been done
         response.setSuccess();
@@ -87,10 +87,16 @@ public class Client extends IOOperation implements Runnable {
         response.setOption(2);
 
         //Instantiate the body
-        HashMap<String, String> body = new HashMap<String, String>();
+        response.setBody(new HashMap<String, Object>());
 
         //We generate the certificat for the user ...
-        body.put("certificat", "Some Certificat");
+        response.getBody().put("certificat", "Some Certificat");
+
+        //Set the response as correct
+        response.setSuccess();
+
+        //And return True
+        return true;
     }
 
     public static void main(String[] args) {

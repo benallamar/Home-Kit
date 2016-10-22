@@ -29,16 +29,16 @@ public class Server extends IOOperation {
             while (true) {
                 socket = server.accept();
                 SocketBody request = read();
+                //We switch from one user to another.
                 switch (request.getOption()) {
                     case 1:
-                        //We skip the part in which we ask the user to confirme the connection with the component.
-                        print("Connection...");
+                        print("Connection with the component: " + request.getKey("modulus"));
                         SocketBody response = new SocketBody();
                         acceptConnection(request, response);
                         print("Connection accepter!");
                         write(response);
                         request = read();
-                        acceptConnection(request, response);
+                        connect(request, response);
                         write(response);
                         break;
                     case 2:
@@ -62,21 +62,35 @@ public class Server extends IOOperation {
     }
 
     public boolean connect(SocketBody request, SocketBody response) {
+        //we set the option to get the write from the server
+        response.setOption(1);
+
+        //Set the response body
+        response.setBody(new HashMap<String, Object>());
+
+        //Set the body of the connections
+        response.getBody().put("public_key", maCle.pubKey().toString());
+
+        //We want tell the client the operation has been well
         response.setSuccess();
+
+        //Set the response to True
         return true;
     }
 
     public boolean acceptConnection(SocketBody request, SocketBody response) {
-        //
+        //Set to the next option of the operation
         response.setOption(2);
+
         //Instantiate the body of the response
-        HashMap<String, String> body = new HashMap<String, String>()
+        response.setBody(new HashMap<String, Object>());
+
         //We have to instantiate the body fo the response
-        body.put("certificate", "Some string here to send to the server");
-        //Set the bddy to the respone
-        response.setBody(body);
+        response.getBody().put("certificate", "Some string here to send to the server");
+
         //Set the status for the response
         response.setSuccess();
+
         //And return True
         return true;
     }
