@@ -4,7 +4,10 @@ import Security.Certificat;
 import Security.PaireClesRSA;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.net.ServerSocket;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 
 /**
@@ -18,6 +21,7 @@ public class Server extends IOOperation {
         try {
             server = new ServerSocket(port);
             maCle = new PaireClesRSA(1024);
+            name = "server";
 
         } catch (IOException e) {
             System.out.println("Error 1" + e.getMessage());
@@ -32,14 +36,16 @@ public class Server extends IOOperation {
                 //We switch from one user to another.
                 switch (request.getOption()) {
                     case 1:
-                        print("Connection with the component: " + request.getKey("modulus"));
+                        print("Connection with the component: " + request.getKey("name"));
                         SocketBody response = new SocketBody();
                         acceptConnection(request, response);
                         print("Connection accepter!");
                         write(response);
                         request = read();
-                        connect(request, response);
-                        write(response);
+                        if (request.isSuccess()) {
+                            connect(request, response);
+                            write(response);
+                        }
                         break;
                     case 2:
                         print("Get the component CA");
@@ -49,9 +55,8 @@ public class Server extends IOOperation {
                         break;
                     default:
                         print("Unknow option");
-                        socket.close();
                 }
-                socket.close();
+                close();
             }
         } catch (IOException e) {
             System.out.println("Error 2" + e.getMessage());
@@ -78,15 +83,24 @@ public class Server extends IOOperation {
         return true;
     }
 
-    public boolean acceptConnection(SocketBody request, SocketBody response) {
+    public boolean acceptConnection(SocketBody request, SocketBody response) throws NoSuchAlgorithmException, InvalidKeySpecException {
         //Set to the next option of the operation
-        response.setOption(2);
+        response.setOption(1);
 
         //Instantiate the body of the response
         response.setBody(new HashMap<String, Object>());
 
         //We have to instantiate the body fo the response
-        response.getBody().put("certificate", "Some string here to send to the server");
+        HashMap<String, Object> key_spec = request.getBody();
+        Certificat certificat =
+        response
+                .getBody()
+                .put(
+                        "certificate",
+                        new Certificat(
+                                name,
+                                PaireClesRSA.genertatePublicKey((BigInteger) key_spec.get("modulus"), (BigInteger) key_spec.get("exponent")),
+                                365));
 
         //Set the status for the response
         response.setSuccess();

@@ -41,6 +41,8 @@ public class Client extends IOOperation implements Runnable {
                         acceptConnection(request, response);
                         write(request);
                         print("connection has been established between the two component");
+                        response = read();
+                        print(response.getBody().toString());
                         break;
                     default:
                         print("Connection refused");
@@ -49,7 +51,7 @@ public class Client extends IOOperation implements Runnable {
                 print("Error on the server");
             }
 
-            socket.close();
+            close();
         } catch (IOException e) {
             System.out.println("Error 2" + e.getMessage());
         } catch (
@@ -58,8 +60,6 @@ public class Client extends IOOperation implements Runnable {
         {
             System.out.println("Error 3" + e.getMessage());
         }
-
-
     }
 
     public boolean connect(SocketBody response) {

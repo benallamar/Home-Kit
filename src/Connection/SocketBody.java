@@ -41,4 +41,8 @@ public final class SocketBody {
     public void setFailed() {
         this.status = 500;
     }
+
+    public String toString() {
+        return body.toString();
+    }
 }

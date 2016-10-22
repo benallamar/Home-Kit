@@ -18,11 +18,15 @@ public abstract class IOOperation extends Thread {
     protected PaireClesRSA maCle;
     protected Certificat monCert;
     protected String name;
+    protected OutputStream os = null;
+    protected ObjectOutputStream oos = null;
+    InputStream is = null;
+    ObjectInputStream ois = null;
 
     // @over
     public void write(SocketBody response) throws IOException, ClassNotFoundException {
-        OutputStream os = socket.getOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(os);
+        os = socket.getOutputStream();
+        oos = new ObjectOutputStream(os);
         //We have to cypher the message before we send it.
         //TODO: Add the PGP Protocol
         String encryptedMessage = JSONParser.serialize(response);
@@ -31,11 +35,12 @@ public abstract class IOOperation extends Thread {
     }
 
     public SocketBody read() throws IOException, ClassNotFoundException {
-        InputStream is = socket.getInputStream();
-        ObjectInputStream ois = new ObjectInputStream(is);
+        is = socket.getInputStream();
+        ois = new ObjectInputStream(is);
         //We have to decypher the gotten message
         //TODO : Add the PGP protocol here
         String decryptedMessage = (String) ois.readObject();
+        System.out.println(JSONParser.deserialize(decryptedMessage).toString());
         return JSONParser.deserialize(decryptedMessage);
     }
 
@@ -43,5 +48,12 @@ public abstract class IOOperation extends Thread {
         System.out.println(string);
     }
 
+    public void close() throws IOException {
+        os.close();
+        oos.close();
+        is.close();
+        ois.close();
+        socket.close();
+    }
 
 }

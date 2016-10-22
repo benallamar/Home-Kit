@@ -1,7 +1,10 @@
 package Security;
 
+import java.math.BigInteger;
 import java.security.*;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.HashMap;
 
 /**
@@ -37,4 +40,12 @@ public class PaireClesRSA {
         serialize.put("exponent", ((RSAPublicKey) key.getPublic()).getModulus().toString());
         return serialize;
     }
+
+    public static PublicKey genertatePublicKey(BigInteger modulus, BigInteger exponent) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        RSAPublicKeySpec gen = new RSAPublicKeySpec(modulus, exponent);
+        KeyFactory key_fact = KeyFactory.getInstance("RSA");
+        return key_fact.generatePublic(gen);
+    }
+
+
 }
