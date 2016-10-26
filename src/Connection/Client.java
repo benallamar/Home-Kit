@@ -26,11 +26,11 @@ public class Client extends IOOperation implements Runnable {
     }
 
     public void run() {
-        //TO DO: Implements this class to have the both client and server communicate
+        //TO DO: Implements this class to have both the client and server communicate
         try {
             SocketBody response = new SocketBody();
-            //Display the message of waitin connection
-            print("Connecxion en cours ...");
+            //Display the message of waiting connection
+            print("Connexion en cours ...");
             connect(response);
             write(response);
             SocketBody request = read();

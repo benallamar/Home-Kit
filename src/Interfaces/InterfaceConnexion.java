@@ -10,13 +10,16 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JTextField;
 
 public class InterfaceConnexion extends JDialog {
-
+		
+	
 	private final JPanel contentPanel = new JPanel();
 	private JTextField textField;
 
 	/**
 	 * Launch the application.
 	 */
+	
+
 	public static void main(String[] args) {
 		try {
 			InterfaceConnexion dialog = new InterfaceConnexion();
@@ -27,6 +30,7 @@ public class InterfaceConnexion extends JDialog {
 		}
 	}
 
+	
 	/**
 	 * Create the dialog.
 	 */
