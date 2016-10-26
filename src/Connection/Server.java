@@ -2,6 +2,7 @@ package Connection;
 
 import Security.Certificat;
 import Security.PaireClesRSA;
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -11,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 /**
  * Created by marouanebenalla on 07/10/2016.
@@ -26,6 +28,7 @@ public class Server extends IOOperation {
     protected SocketBody response;
     protected SocketBody request;
     HashMap<String, String> tokens = new HashMap<String, String>();
+    LinkedList<String> errors = new LinkedList<String>();
 
     public Server(int port) {
         try {
@@ -45,59 +48,70 @@ public class Server extends IOOperation {
                 socket = server.accept();
                 request = read();
                 //We switch from one user to another.
-                switch (request.getOption()) {
-                    case 1:
-                        print("Connection with the component: " + request.getName());
-                        acceptConnection(request, response);
-                        print("Connection accepter!");
-                        write(response);
-                        request = read();
-                        if (request.isSuccess()) {
-                            connect(request, response);
+                print("You have new connection with the device" + request.getName());
+                if (isConnected(request, response)) {
+                    //We check the othe params that his is looking for
+                    switch (request.getOption()) {
+                        case 2:
+                            print("Get the component CA");
+                            sendCA(request, response);
                             write(response);
-                        }
-                        break;
-                    case 2:
-                        print("Get the component CA");
-                        sendCA(request, response);
-                        write(response);
-                        break;
-                    case 3:
-                        print("Get the componenet DA");
-                        sendDA(request, response);
-                        write(response);
-                        break;
-                    case 4:
-                        doYouTrust(request, response);
-                        write(response);
-                        /* Other options could */
-                    case 5:
-                        generateCode(request, response);
-                        break;
+                            break;
+                        default:
+                            print("Option not recognized");
 
-                    case 6:
-                        //On fait du OAuth2 Authentification
-                        print("Check the checksum code");
-                        checkCode(request, response);
-                        write(response);
-                    default:
-                        print("Unknow option");
+                    }
+                } else {
+                    //We have to try to connect it to the server or cancel the connection
+                    generateCode(request, response);
+                    request = read();
+                    if (checkCode(request)) {
+                        connect(request, response);
+                        acceptConnection(read(), response);
+                    } else {
+                        unauthorized(response);
+                    }
+
                 }
                 close();
             }
-        } catch (IOException e) {
-            System.out.println("Error 2" + e.getMessage());
+        } catch (
+                IOException e)
 
-        } catch (ClassNotFoundException e) {
+        {
+            System.out.println("Error 2" + e.getMessage());
+            errors.add(e.getLocalizedMessage())
+
+        } catch (
+                ClassNotFoundException e)
+
+        {
             System.out.println("Error 3" + e.getMessage());
-        } catch (InvalidKeySpecException e) {
+            errors.add(e.getLocalizedMessage())
+
+        } catch (
+                InvalidKeySpecException e)
+
+        {
             System.out.println("Error 4" + e.getMessage());
-        } catch (NoSuchAlgorithmException e) {
+            errors.add(e.getLocalizedMessage())
+
+        } catch (
+                NoSuchAlgorithmException e)
+
+        {
             System.out.println("Error 5" + e.getMessage());
+            errors.add(e.getLocalizedMessage())
+
         }
+
     }
 
-    public void connect(SocketBody request, SocketBody response) {
+    public boolean isConnected(SocketBody request) {
+        return true;
+    }
+
+    public void connect(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException {
         //we set the option to get the write from the server
         response.setOption(1);
 
@@ -110,8 +124,8 @@ public class Server extends IOOperation {
         //We want tell the client the operation has been well
         response.setSuccess();
 
-        //Set the response to True
-        return true;
+        //Set the response
+        write(response);
     }
 
     public void acceptConnection(SocketBody request, SocketBody response) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -138,7 +152,7 @@ public class Server extends IOOperation {
 
     }
 
-    public void refuseConnection(SocketBody request, SocketBody response) {
+    public void refuseConnection(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException {
 
         //Set the option
         response.setOption(2);
@@ -179,21 +193,14 @@ public class Server extends IOOperation {
         response.setSuccess();
     }
 
-    public void checkCode(SocketBody request, SocketBody response) {
+    public boolean checkCode(SocketBody request) {
         //TODO: Check the code
         String token = (String) request.getKey("token");
-        int code = (int) request.getKey("Code");
-        if (tokens.get(token) == code) {
-            //The code has been validted so we have to move to the next step
-            response.setOption(1);
-            response.setSuccess();
-        } else {
-            //The code hasn't been validated
-            response.setFailed();
-        }
+        String code = (String) request.getKey("Code");
+        return tokens.get(token) == code;
     }
 
-    public void generateCode(SocketBody request, SocketBody response) {
+    public void generateCode(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException {
         //Generate the code and the token
         String token = genSecCode(13);
         String code = genSecCode(13);
@@ -212,8 +219,18 @@ public class Server extends IOOperation {
 
         //Set Success
         response.setSuccess();
+        //Set the response
+        write(response);
     }
 
+    public void unauthorized(SocketBody response) throws IOException, ClassNotFoundException {
+        //set the option that you have and error and close the connection
+        response.setNewBody();
+        response.setFailed();
+        //Send the response and close the socket after
+        write(response);
+        close();
+    }
 
     public static void main(String[] args) {
         Server server = new Server(3000);
