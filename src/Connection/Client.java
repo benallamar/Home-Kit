@@ -73,7 +73,7 @@ public class Client extends IOOperation implements Runnable {
         //We have to send the certificate to the server so he could create for as a kind of certificate
         response.getBody().put("public_key", maCle.serialize());
         response.getBody().put("name", name);
-
+        response.getBody().put("port", port);
         //Set that the operation has been done
         response.setSuccess();
 
@@ -103,4 +103,5 @@ public class Client extends IOOperation implements Runnable {
 
         new Client("localhost", 3000).run();
     }
+    public boolean doYouTrus
 }

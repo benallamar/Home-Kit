@@ -7,11 +7,18 @@ import java.io.*;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 
 /**
  * Created by marouanebenalla on 07/10/2016.
+ */
+/*
+For server there are four main option:
+    1- Connect.
+    2- Connection Accepted.
+    3- Do you trust the equipement with the given id.
  */
 public class Server extends IOOperation {
     protected int port = 12345;
@@ -53,6 +60,9 @@ public class Server extends IOOperation {
                     case 3:
                         print("Get the componenet DA");
                         break;
+                    case 3:
+                        //Here for handling trust.
+                        break;
                     default:
                         print("Unknow option");
                 }
@@ -66,7 +76,7 @@ public class Server extends IOOperation {
         }
     }
 
-    public boolean connect(SocketBody request, SocketBody response) {
+    public void connect(SocketBody request, SocketBody response) {
         //we set the option to get the write from the server
         response.setOption(1);
 
@@ -83,7 +93,7 @@ public class Server extends IOOperation {
         return true;
     }
 
-    public boolean acceptConnection(SocketBody request, SocketBody response) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public void acceptConnection(SocketBody request, SocketBody response) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         //Set to the next option of the operation
         response.setOption(1);
 
@@ -92,21 +102,24 @@ public class Server extends IOOperation {
 
         //We have to instantiate the body fo the response
         HashMap<String, Object> key_spec = request.getBody();
-        Certificat certificat =
-        response
-                .getBody()
-                .put(
-                        "certificate",
-                        new Certificat(
-                                name,
-                                PaireClesRSA.genertatePublicKey((BigInteger) key_spec.get("modulus"), (BigInteger) key_spec.get("exponent")),
-                                365));
-
+        PublicKey pubKey = PaireClesRSA.genertatePublicKey((BigInteger) request.getKey("modulus"), (BigInteger) request.getKey("exponent"));
+        Certificat certificat = new Certificat(
+                name,
+                pubKey,
+                maCle.privKey(),
+                356
+        );
+        response.getBody().put("certificate", Certificat.serialize(certificat));
+        DA.put(response.getKey("port"), certificat);
         //Set the status for the response
         response.setSuccess();
 
-        //And return True
-        return true;
+    }
+
+    public void trust(SocketBody request, SocketBody response) {
+        //And we have to see if we trust any of the following
+
+
     }
 
     public static void main(String[] args) {

@@ -13,15 +13,18 @@ import Security.PaireClesRSA;
  * Project Name : TL_crypto
  */
 public abstract class IOOperation extends Thread {
-    public Socket socket = null;
+    protected Socket socket = null;
     protected ServerSocket server = null;
     protected PaireClesRSA maCle;
     protected Certificat monCert;
     protected String name;
     protected OutputStream os = null;
     protected ObjectOutputStream oos = null;
-    InputStream is = null;
-    ObjectInputStream ois = null;
+    protected HashMap<Integer, Certificat> DA = new HashMap<Integer, Certificat>();
+    protected HashMap<Integer, Certificat> CA = new HashMap<Integer, Certificat>();
+    protected InputStream is = null;
+    protected ObjectInputStream ois = null;
+    protected int port;
 
     // @over
     public void write(SocketBody response) throws IOException, ClassNotFoundException {
