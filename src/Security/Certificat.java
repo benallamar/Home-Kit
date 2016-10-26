@@ -42,7 +42,7 @@ public class Certificat {
         }
     }
 
-    public Certificat(StringBuffer Name, PublicKey publicKey, PrivateKey privateKey, int validityDays){
+    public Certificat(String name, PublicKey publicKey, PrivateKey privateKey, int validityDays) {
         //Define the SubjectPubicKeyInfo
         SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(key.pubKey().getEncoded());
         Date startDate = new Date(System.currentTimeMillis());
@@ -57,15 +57,16 @@ public class Certificat {
         );
         try {
             ContentSigner sigGen = new JcaContentSignerBuilder("SHA1withRSA").setProvider("BC").build(key.privKey());
-            x509 = CertGen.build(sigGen);
+            x509 = CertGen.build(sigGen);git status$
+
         } catch (OperatorCreationException e) {
 
         }
     }
 
     public boolean verifiCerif(PublicKey publicKey) {
-        // return True, if the certificat is valid
-        return x509.isValidOn(new Date());
+        //TODO: Verfifying the Certficat using the private cle.
+        return x509.isValidOn(new Date())//Check the signature of the key;
 
     }
 

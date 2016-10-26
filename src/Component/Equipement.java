@@ -11,8 +11,6 @@ import java.util.HashSet;
  * Project Name : TL_crypto
  */
 public class Equipement extends Server {
-    private Equipement parent = null;
-    private HashSet<Equipement> childs = new HashSet<Equipement>();
     private int port;
 
     public Equipement(String name, int port) {

@@ -41,4 +41,12 @@ public final class SocketBody {
     public void setFailed() {
         this.status = 500;
     }
+
+    public void setNewBody() {
+        body = new HashMap<String, Object>()
+    }
+
+    public void setKey(String key, Object object) {
+        body.put(key, object);
+    }
 }

@@ -1,13 +1,18 @@
 package Connection;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.HashMap;
 
 import Console.JSONParser;
 import Security.Certificat;
 import Security.PaireClesRSA;
+
+import java.util.UUID;
 
 /**
  * Project Name : TL_crypto
@@ -18,6 +23,8 @@ public abstract class IOOperation extends Thread {
     protected PaireClesRSA maCle;
     protected Certificat monCert;
     protected String name;
+    protected HashMap<Integer, Certificat> CA = HashMap < Integer, Certificat>();
+    protected HashMap<Integer, Certificat> DA = HashMap < Integer, Certificat>();
 
     // @over
     public void write(SocketBody response) throws IOException, ClassNotFoundException {
@@ -43,5 +50,8 @@ public abstract class IOOperation extends Thread {
         System.out.println(string);
     }
 
+    public String genSecCode(int length) {
+        return UUID.randomUUID().toString().substring(0, length);
+    }
 
 }
