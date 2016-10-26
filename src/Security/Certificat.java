@@ -9,12 +9,15 @@ import java.security.PublicKey;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.CertException;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
 import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.bouncycastle.util.io.pem.PemWriter;
 
@@ -27,6 +30,7 @@ public class Certificat {
     static private BigInteger seqnum = BigInteger.ZERO;
     public X509CertificateHolder x509;
 
+    //For autoSigned Ceritifcate
     public Certificat(String name, PaireClesRSA key, int validityDays) {
         //Define the SubjectPubicKeyInfo
         SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(key.pubKey().getEncoded());
@@ -53,7 +57,7 @@ public class Certificat {
         x509 = certificat;
     }
 
-
+    //For Signer Certificate
     public Certificat(String name, PublicKey publicKey, PrivateKey privateKey, int validityDays) {
         //Define the SubjectPubicKeyInfo
         SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(publicKey.getEncoded());
@@ -75,9 +79,11 @@ public class Certificat {
         }
     }
 
-    public boolean verifiCerif(PublicKey publicKey) {
+    public boolean verifiCerif(PublicKey publicKey) throws OperatorCreationException, CertException {
         //TODO: Verfifying the Certficat using the private cle.
-        return x509.isValidOn(new Date())//Check the signature of the key;
+        ContentVerifierProvider contentVerifierProvider = new JcaContentVerifierProviderBuilder()
+                .setProvider("BC").build(publicKey);
+        return x509.isSignatureValid(contentVerifierProvider);
 
     }
 

@@ -6,6 +6,7 @@ import Security.PaireClesRSA;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.ServerSocket;
+import java.security.KeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -22,8 +23,8 @@ For server there are four main option:
  */
 public class Server extends IOOperation {
     protected int port = 12345;
-    SocketBody request = new SocketBody();
-    SocketBody response = new SocketBody();
+    protected SocketBody response;
+    protected SocketBody request;
     HashMap<String, String> tokens = new HashMap<String, String>();
 
     public Server(int port) {
@@ -31,6 +32,7 @@ public class Server extends IOOperation {
             server = new ServerSocket(port);
             maCle = new PaireClesRSA(1024);
             name = "server";
+            response = new SocketBody(name, port);
 
         } catch (IOException e) {
             System.out.println("Error 1" + e.getMessage());
@@ -45,7 +47,7 @@ public class Server extends IOOperation {
                 //We switch from one user to another.
                 switch (request.getOption()) {
                     case 1:
-                        print("Connection with the component: " + request.getKey("name"));
+                        print("Connection with the component: " + request.getName());
                         acceptConnection(request, response);
                         print("Connection accepter!");
                         write(response);
@@ -88,6 +90,10 @@ public class Server extends IOOperation {
 
         } catch (ClassNotFoundException e) {
             System.out.println("Error 3" + e.getMessage());
+        } catch (InvalidKeySpecException e) {
+            System.out.println("Error 4" + e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("Error 5" + e.getMessage());
         }
     }
 
@@ -117,22 +123,31 @@ public class Server extends IOOperation {
         //Instantiate the body of the response
         response.setNewBody();
 
-        //We have to instantiate the body fo the response
-        HashMap<String, Object> key_spec = request.getBody();
-        PublicKey pubKey = PaireClesRSA.genertatePublicKey((BigInteger) request.getKey("modulus"), (BigInteger) request.getKey("exponent"));
-        Certificat certificat = new Certificat(
-                name,
-                pubKey,
-                maCle.privKey(),
-                356
-        );
-        response.getBody().put("certificate", Certificat.serialize(certificat));
-        DA.put(response.getKey("port"), certificat);
-        response.setKey("certificate", "Some string here to send to the server");
+        //We generate the certificate after accepting the connection
+        PublicKey pubKey = PaireClesRSA.desrialize((String) request.getKey("public_key"));
+        Certificat certificat = new Certificat(name, pubKey, maCle.privKey(), 356);
+
+        //We serialize the certificat and we put it on the body
+        response.setKey("certificate", Certificat.serialize(certificat));
+
+        //We update the CA file.
+        CA.put((Integer) response.getKey("port"),[pubKey, certificat]);
 
         //Set the status for the response
         response.setSuccess();
 
+    }
+
+    public void refuseConnection(SocketBody request, SocketBody response) {
+
+        //Set the option
+        response.setOption(2);
+
+        //Instantiate the response body
+        response.setFailed();
+
+        //Add the information to the DA(Not permitted devices
+        DA.put(request.getPort(), getName());
     }
 
     public void trust(SocketBody request, SocketBody response) {

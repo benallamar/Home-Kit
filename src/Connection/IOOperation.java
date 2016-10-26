@@ -25,8 +25,8 @@ public abstract class IOOperation extends Thread {
     protected String name;
     protected OutputStream os = null;
     protected ObjectOutputStream oos = null;
-    protected HashMap<Integer, Certificat> DA = new HashMap<Integer, Certificat>();
-    protected HashMap<Integer, Certificat> CA = new HashMap<Integer, Certificat>();
+    protected HashMap<Integer, String> DA = new HashMap<Integer, String>();
+    protected HashMap<Integer, Object[]> CA = new HashMap<Integer, Object[]>();
     protected InputStream is = null;
     protected ObjectInputStream ois = null;
     protected int port;

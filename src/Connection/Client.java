@@ -31,6 +31,7 @@ public class Client extends IOOperation implements Runnable {
             SocketBody response = new SocketBody();
             //Display the message of waiting connection
             print("Connexion en cours ...");
+            //We have to check if is not connected.
             connect(response);
             write(response);
             SocketBody request = read();
@@ -95,7 +96,6 @@ public class Client extends IOOperation implements Runnable {
 
         //We have to send the certificate to the server so he could create for as a kind of certificate
         response.setKey("public_key", maCle.serialize());
-        response.setKey("name", name);
 
         //Set that the operation has been done
         response.setSuccess();
@@ -113,7 +113,9 @@ public class Client extends IOOperation implements Runnable {
         response.setNewBody();
 
         //We generate the certificat for the user ...
+
         response.setKey("certificat", "Some Certificat");
+        //We add the certificat to the CA
 
         //Set the response as correct
         response.setSuccess();
@@ -143,5 +145,10 @@ public class Client extends IOOperation implements Runnable {
 
         new Client("localhost", 3000).run();
     }
-    public boolean doYouTrus
+
+    public boolean doYouTrust(SocketBody request, SocketBody response) {
+        //We use this to implement the function doYouTrustThisEquipement
+        //So we need to send the certification that he has we other.
+        return true;
+    }
 }

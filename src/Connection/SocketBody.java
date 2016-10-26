@@ -8,7 +8,22 @@ import java.util.HashMap;
 public final class SocketBody {
     private int status = 200;
     private int option = 1;
+    private String name;
+    private int port;
     private HashMap<String, Object> body = new HashMap<String, Object>();
+
+    public SocketBody(String name, int port) {
+        this.name = name;
+        this.port = port;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getPort() {
+        return port;
+    }
 
     public boolean isSuccess() {
         return status == 200;
@@ -31,6 +46,7 @@ public final class SocketBody {
     }
 
     public void setOption(int option) {
+        int[]
         this.option = option;
     }
 
@@ -47,7 +63,7 @@ public final class SocketBody {
     }
 
     public void setNewBody() {
-        body = new HashMap<String, Object>()
+        body = new HashMap<String, Object>();
     }
 
     public void setKey(String key, Object object) {
