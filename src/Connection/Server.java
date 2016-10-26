@@ -22,7 +22,9 @@ For server there are four main option:
  */
 public class Server extends IOOperation {
     protected int port = 12345;
-
+    SocketBody request = new SocketBody();
+    SocketBody response = new SocketBody();
+    HashMap<String, String> tokens = new HashMap<String, String>();
 
     public Server(int port) {
         try {
@@ -39,12 +41,11 @@ public class Server extends IOOperation {
         try {
             while (true) {
                 socket = server.accept();
-                SocketBody request = read();
+                request = read();
                 //We switch from one user to another.
                 switch (request.getOption()) {
                     case 1:
                         print("Connection with the component: " + request.getKey("name"));
-                        SocketBody response = new SocketBody();
                         acceptConnection(request, response);
                         print("Connection accepter!");
                         write(response);
@@ -56,13 +57,27 @@ public class Server extends IOOperation {
                         break;
                     case 2:
                         print("Get the component CA");
+                        sendCA(request, response);
+                        write(response);
                         break;
                     case 3:
                         print("Get the componenet DA");
+                        sendDA(request, response);
+                        write(response);
                         break;
-                    case 3:
-                        //Here for handling trust.
+                    case 4:
+                        doYouTrust(request, response);
+                        write(response);
+                        /* Other options could */
+                    case 5:
+                        generateCode(request, response);
                         break;
+
+                    case 6:
+                        //On fait du OAuth2 Authentification
+                        print("Check the checksum code");
+                        checkCode(request, response);
+                        write(response);
                     default:
                         print("Unknow option");
                 }
@@ -81,10 +96,10 @@ public class Server extends IOOperation {
         response.setOption(1);
 
         //Set the response body
-        response.setBody(new HashMap<String, Object>());
+        response.setNewBody();
 
         //Set the body of the connections
-        response.getBody().put("public_key", maCle.pubKey().toString());
+        response.setKey("public_key", maCle.pubKey().toString());
 
         //We want tell the client the operation has been well
         response.setSuccess();
@@ -94,11 +109,13 @@ public class Server extends IOOperation {
     }
 
     public void acceptConnection(SocketBody request, SocketBody response) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+
+
         //Set to the next option of the operation
         response.setOption(1);
 
         //Instantiate the body of the response
-        response.setBody(new HashMap<String, Object>());
+        response.setNewBody();
 
         //We have to instantiate the body fo the response
         HashMap<String, Object> key_spec = request.getBody();
@@ -111,6 +128,8 @@ public class Server extends IOOperation {
         );
         response.getBody().put("certificate", Certificat.serialize(certificat));
         DA.put(response.getKey("port"), certificat);
+        response.setKey("certificate", "Some string here to send to the server");
+
         //Set the status for the response
         response.setSuccess();
 
@@ -121,6 +140,65 @@ public class Server extends IOOperation {
 
 
     }
+
+    public boolean doYouTrust(SocketBody request, SocketBody response) {
+        //TODO:Creating the algorithm handling request routing
+        return true;
+    }
+
+    public void getDA(SocketBody request, SocketBody response) {
+        //TODO: Get the list of the CA list
+        response.setOption(3);
+        for (Certificat cert : DA.values()) {
+            response.setKey("cert", cert);
+        }
+        response.setSuccess();
+    }
+
+    public void getCA(SocketBody request, SocketBody response) {
+        //TODO: To send the list of the DA list
+        response.setOption(3);
+        for (Certificat cert : CA.values()) {
+            response.setKey("cert", cert);
+        }
+        response.setSuccess();
+    }
+
+    public void checkCode(SocketBody request, SocketBody response) {
+        //TODO: Check the code
+        String token = (String) request.getKey("token");
+        int code = (int) request.getKey("Code");
+        if (tokens.get(token) == code) {
+            //The code has been validted so we have to move to the next step
+            response.setOption(1);
+            response.setSuccess();
+        } else {
+            //The code hasn't been validated
+            response.setFailed();
+        }
+    }
+
+    public void generateCode(SocketBody request, SocketBody response) {
+        //Generate the code and the token
+        String token = genSecCode(13);
+        String code = genSecCode(13);
+
+        //Save the information about the generated token
+        tokens.put(token, code);
+
+        //Set the request body
+        response.setOption(2);
+
+        //Set new Body
+        response.setNewBody();
+
+        //Fill the body of the response
+        response.setKey("token", token);
+
+        //Set Success
+        response.setSuccess();
+    }
+
 
     public static void main(String[] args) {
         Server server = new Server(3000);

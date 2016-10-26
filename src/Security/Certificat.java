@@ -15,8 +15,6 @@ import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemObjectGenerator;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.bouncycastle.util.io.pem.PemWriter;
 
@@ -50,9 +48,11 @@ public class Certificat {
         }
     }
 
+
     public Certificat(X509CertificateHolder certificat) {
         x509 = certificat;
     }
+
 
     public Certificat(String name, PublicKey publicKey, PrivateKey privateKey, int validityDays) {
         //Define the SubjectPubicKeyInfo
@@ -76,8 +76,8 @@ public class Certificat {
     }
 
     public boolean verifiCerif(PublicKey publicKey) {
-        // return True, if the certificat is valid
-        return x509.isValidOn(new Date());
+        //TODO: Verfifying the Certficat using the private cle.
+        return x509.isValidOn(new Date())//Check the signature of the key;
 
     }
 

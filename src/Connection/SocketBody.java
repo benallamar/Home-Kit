@@ -45,4 +45,12 @@ public final class SocketBody {
     public String toString() {
         return body.toString();
     }
+
+    public void setNewBody() {
+        body = new HashMap<String, Object>()
+    }
+
+    public void setKey(String key, Object object) {
+        body.put(key, object);
+    }
 }

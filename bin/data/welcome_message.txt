@@ -1,0 +1,8 @@
+Bonjour {{Equipement}},
+1=> Information about the component.
+2=> Liste Parents
+3=> Liste Childs
+4=> Init. for server
+5=> Init. for client
+6=> Good Bye !
+Enter your chose ://you could change the code as you want without having to worry about it.

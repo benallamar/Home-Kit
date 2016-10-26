@@ -1,13 +1,18 @@
 package Connection;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.HashMap;
 
 import Console.JSONParser;
 import Security.Certificat;
 import Security.PaireClesRSA;
+
+import java.util.UUID;
 
 /**
  * Project Name : TL_crypto
@@ -57,6 +62,11 @@ public abstract class IOOperation extends Thread {
         is.close();
         ois.close();
         socket.close();
+    }
+
+    public String genSecCode(int length) {
+        return UUID.randomUUID().toString().substring(0, length);
+
     }
 
 }

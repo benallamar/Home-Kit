@@ -4,7 +4,7 @@ import HomKit.Home;
 
 public class Main {
     public static void main(String[] args) {
-        //Run directly the hole system.
+        //Run directly the whole system.
         Home.run();
     }
 }

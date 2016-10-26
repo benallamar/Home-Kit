@@ -26,11 +26,11 @@ public class Client extends IOOperation implements Runnable {
     }
 
     public void run() {
-        //TO DO: Implements this class to have the both client and server communicate
+        //TO DO: Implements this class to have both the client and server communicate
         try {
             SocketBody response = new SocketBody();
-            //Display the message of waitin connection
-            print("Connecxion en cours ...");
+            //Display the message of waiting connection
+            print("Connexion en cours ...");
             connect(response);
             write(response);
             SocketBody request = read();
@@ -44,6 +44,29 @@ public class Client extends IOOperation implements Runnable {
                         response = read();
                         print(response.getBody().toString());
                         break;
+                    case 2:
+                        //Get the CA Informations
+                        print("Get the component CA");
+                        getCA(request, response);
+                        write(response);
+                        break;
+                    case 3:
+                        //Get the DA information
+                        print("Get the componenet DA");
+                        getDA(request, response);
+                        write(response);
+                        break;
+                    case 4:
+                        doYouTrust(request, response);
+                        write(response);
+                        /* Other options could */
+                    case 5:
+                        sendCode(request, response);
+                        break;
+                    case 6:
+                        print("Check the checksum code");
+                        checkCode(request, response);
+                        write(response);
                     default:
                         print("Connection refused");
                 }
@@ -68,12 +91,12 @@ public class Client extends IOOperation implements Runnable {
         response.setOption(1);
 
         //Instantiate the body of our request.
-        response.setBody(new HashMap<String, Object>());
+        response.setNewBody();
 
         //We have to send the certificate to the server so he could create for as a kind of certificate
-        response.getBody().put("public_key", maCle.serialize());
-        response.getBody().put("name", name);
-        response.getBody().put("port", port);
+        response.setKey("public_key", maCle.serialize());
+        response.setKey("name", name);
+
         //Set that the operation has been done
         response.setSuccess();
 
@@ -87,16 +110,33 @@ public class Client extends IOOperation implements Runnable {
         response.setOption(2);
 
         //Instantiate the body
-        response.setBody(new HashMap<String, Object>());
+        response.setNewBody();
 
         //We generate the certificat for the user ...
-        response.getBody().put("certificat", "Some Certificat");
+        response.setKey("certificat", "Some Certificat");
 
         //Set the response as correct
         response.setSuccess();
 
         //And return True
         return true;
+    }
+
+    public void sendCode(SocketBody request, SocketBody response) {
+        //Set the option of the response
+        response.setOption(6);
+
+        //Create new Body
+        response.setNewBody();
+
+        //Fill the body of the response
+        response.setKey("token", "qsdckmnlkrjfn");
+        response.setKey("code", 12454);
+
+        //Set that has been succeed
+        response.setSuccess();
+
+
     }
 
     public static void main(String[] args) {
