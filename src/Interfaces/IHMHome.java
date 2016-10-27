@@ -48,8 +48,7 @@ public class IHMHome extends JFrame {
 
 	}
 
-	public void placeButtons(Equipement equipement,int xinit,int yinit){
-		JPanel newContentPane = new JPanel();
+	public void placeButtons(JPanel newContentPane, Equipement equipement,int xinit,int yinit){
 		int x = 100;
 		int y = 50;
 		int n =1;
@@ -67,16 +66,19 @@ public class IHMHome extends JFrame {
 				JButton bouton = new JButton(equip[i].getName());
 				bouton.setBounds(xres,yres,100,25);
 				newContentPane.add(bouton);
-				placeButtons(equip[i], xres, yres); //On applique récursivement (?) aux enfants
+				placeButtons(newContentPane, equip[i], xres, yres); //On applique récursivement (?) aux enfants
 			}
 		}
 	}
 
 	public void construct(Equipement equipement){
+		JPanel newContentPane = new JPanel();
 		int xhome = 350;
 		int yhome = 25;
-		placeButtons(equipement,xhome,yhome); //On initialise la récursion à l'équipement "central"
-
+		placeButtons(newContentPane,equipement,xhome,yhome); //On initialise la récursion à l'équipement "central"
+		this.setContentPane(newContentPane);
+		this.setVisible(true);
+		this.requestFocus();
 	}
 }
 
