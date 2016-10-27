@@ -16,6 +16,7 @@ import javax.swing.JTextArea;
 public class IHMEquipement extends JFrame {
 	private Equipement equipement;
 	private IHMConnexion vueConnexion;
+	private IHMConnexionReussie vueConnexionReussie;
 	
 	private JPanel contentPane;
 	private JTextField txtInformations;
@@ -59,12 +60,8 @@ public class IHMEquipement extends JFrame {
 		txtInformations.setColumns(10);
 		
 		JButton btnConnexionClient = new JButton("Connexion client");
-		btnConnexionClient.setBounds(260, 79, 125, 23);
+		btnConnexionClient.setBounds(250, 68, 150, 34);
 		contentPane.add(btnConnexionClient);
-		
-		JButton btnConnexionServeur = new JButton("Connexion serveur");
-		btnConnexionServeur.setBounds(260, 47, 125, 23);
-		contentPane.add(btnConnexionServeur);
 		
 		JTextArea textArea = new JTextArea();
 		textArea.setEditable(false);
@@ -96,15 +93,26 @@ public class IHMEquipement extends JFrame {
 		textField_2.setColumns(10);
 	}
 	
-	public void switchScreen(int id){
+	
+	//Cette méthode permet de passer d'une interface à une autre via les ActionListener des différentes IHM
+	public void switchScreen(int id){ 
 		
 		switch(id){
 		case 0:
-			this.setContentPane(vueConnexion);
+			this.setContentPane(this.contentPane);
 			this.setVisible(true);
 			this.requestFocus();
 			break;
 		case 1:
+			this.setContentPane(vueConnexion);
+			this.setVisible(true);
+			this.requestFocus();
+			break;
+		case 2:
+			this.setContentPane(vueConnexionReussie);
+			this.setVisible(true);
+			this.requestFocus();
+			break;
 			
 			
 		default:

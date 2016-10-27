@@ -26,7 +26,7 @@ public class Equipement extends Server {
     }
 
     public void affichage_da() {
-        for (Equipement child : childs) {
+        for (Equipement child : getChilds()) {
             child.affichage();
         }
     }
@@ -58,7 +58,7 @@ public class Equipement extends Server {
     }
 
     public Equipement addChildComp(Equipement childComponent) {
-        childs.add(childComponent);
+        getChilds().add(childComponent);
         return this;
     }
 
@@ -90,4 +90,12 @@ public class Equipement extends Server {
             super.run();
         }
     }
+
+	public HashSet<Equipement> getChilds() {
+		return childs;
+	}
+
+	public void setChilds(HashSet<Equipement> childs) {
+		this.childs = childs;
+	}
 }
