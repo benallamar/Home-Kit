@@ -1,20 +1,24 @@
 package Component;
 
 import Connection.Server;
-import Security.Certificat;
-import Security.PaireClesRSA;
+import HomeSecurityLayer.Certificat;
+import Interfaces.IHMEquipement;
 
 import java.security.PublicKey;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * Project Name : TL_crypto
  */
 public class Equipement extends Server {
+    private IHMEquipement display;
+
     public Equipement(String name, int port) {
         // Define the component
-        super(port);
-        this.name = name;
+        super(name, port);
+        display = new IHMEquipement();
     }
 
     public boolean isEqual(String name) {
@@ -28,7 +32,8 @@ public class Equipement extends Server {
     }
 
     public String name() {
-        return name;
+
+        return name + "\n\n" + port;
     }
 
     public PublicKey maClePub() {
@@ -37,10 +42,6 @@ public class Equipement extends Server {
     }
 
     public Equipement setCertificateForChild(Equipement childComponent) {
-        childComponent
-                .setMonCert(new Certificat(name, maCle, 365)) //Create the certificate
-                .setParent(this);//Add to Parent
-        this.addChildComp(childComponent);
         return this;
     }
 
@@ -78,4 +79,20 @@ public class Equipement extends Server {
 
     }
 
+    public int getPort() {
+        return port;
+    }
+
+    public void update() {
+        display.repaint();
+    }
+
+    public HashMap<Integer, Object[]> getCA() {
+        return CA;
+    }
+
+    public void display() {
+        display = new IHMEquipement();
+        display.setVisible(true);
+    }
 }

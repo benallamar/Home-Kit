@@ -1,10 +1,15 @@
-import Component.Equipement;
-import Connection.Server;
 import HomKit.Home;
+import Interfaces.IHMHome.IHMHome;
 
 public class Main {
     public static void main(String[] args) {
         //Run directly the whole system.
-        Home.run();
+        try {
+            new IHMHome();
+            Home.run();
+        } catch (InterruptedException e) {
+
+        }
+
     }
 }

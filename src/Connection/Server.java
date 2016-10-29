@@ -1,13 +1,14 @@
 package Connection;
 
-import Security.Certificat;
-import Security.PaireClesRSA;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+import HomeSecurityLayer.Certificat;
+import HomeSecurityLayer.PaireClesRSA;
+import Interfaces.IHMConnexion;
 import org.bouncycastle.cert.CertException;
 import org.bouncycastle.operator.OperatorCreationException;
 
 import java.io.*;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -24,175 +25,211 @@ For server there are four main option:
     2- Connection Accepted.
     3- Do you trust the equipement with the given id.
  */
-public class Server extends IOOperation {
-    protected int port = 12345;
+public class Server extends Client {
     HashMap<String, String> tokens = new HashMap<String, String>();
     LinkedList<String> errors = new LinkedList<String>();
+    public boolean on = false;
+    boolean mode_server = true;
 
-    public Server(int port) {
+    public Server(String name, int port) {
+        super(name, port);
         try {
             server = new ServerSocket(port);
-            maCle = new PaireClesRSA(1024);
-            name = "server";
-            response = new SocketBody(name);
-
+            on = true;
         } catch (IOException e) {
             System.out.println("Error 1" + e.getMessage());
         }
     }
 
-    public void run() {
-        try {
-            while (true) {
-                socket = server.accept();
-                request = read(false);
+    public void runServer() {
+        print("server is on");
+        while (true) {
+            try {
+
+                SocketHandler s = new SocketHandler(server.accept(), name);
+                read(s, false);
+                //Open the sessions
+                openSession(s);
+                //Set the response of our header
+                s.setHeader();
+                //Set the public Key to decipher the code
+                s.setPublicKey(maCle);
                 //We switch from one user to another.
-                print("You have new connection with the device" + request.getSourceName());
-                if (isConnected(request)) {
-                    //We check the othe params that his is looking for
-                    handleConnectedEquipement(request, response);
+                IHMConnexion serverDisplay = new IHMConnexion("Server" + getName(), s.getSourceName());
+                //Check of is a trusted equipement
+                serverDisplay.checkTrustedEquipement();
+                if (isConnected(s)) {
+
+                    serverDisplay.dispose();
+                    handleConnectedEquipement(s);
 
                 } else {
                     //We have to try to connect it to the server or cancel the connection
-                    handleNotConnectEquipement(request, response);
+                    handleNotConnectEquipement(s, serverDisplay);
+                    update();
                 }
-                close();
+
+                close(s);
+
+
+            } catch (IOException e)
+
+            {
+                System.out.println("Error 2" + e.getMessage());
+                errors.add(e.getLocalizedMessage());
+
+            } catch (ClassNotFoundException e)
+
+            {
+                System.out.println("Error 3" + e.getMessage());
+                errors.add(e.getLocalizedMessage());
+
+            } catch (OperatorCreationException e)
+
+            {
+                System.out.println("Error 3" + e.getMessage());
+                errors.add(e.getLocalizedMessage());
+
+            } catch (CertException e)
+
+            {
+                System.out.println("Error 3" + e.getMessage());
+                errors.add(e.getLocalizedMessage());
+
+            } catch (InvalidKeySpecException e)
+
+            {
+                System.out.println("Error 4" + e.getMessage());
+                errors.add(e.getLocalizedMessage());
+
+            } catch (NoSuchAlgorithmException e)
+
+            {
+                System.out.println("Error 5" + e.getMessage());
+                errors.add(e.getLocalizedMessage());
 
             }
-
-        } catch (IOException e)
-
-        {
-            System.out.println("Error 2" + e.getMessage());
-            errors.add(e.getLocalizedMessage());
-
-        } catch (ClassNotFoundException e)
-
-        {
-            System.out.println("Error 3" + e.getMessage());
-            errors.add(e.getLocalizedMessage());
-
-        } catch (InvalidKeySpecException e)
-
-        {
-            System.out.println("Error 4" + e.getMessage());
-            errors.add(e.getLocalizedMessage());
-
-        } catch (NoSuchAlgorithmException e)
-
-        {
-            System.out.println("Error 5" + e.getMessage());
-            errors.add(e.getLocalizedMessage());
-
         }
+
 
     }
 
 
-    public boolean isConnected(SocketBody request) {
+    public boolean isConnected(SocketHandler s) {
         return false;
     }
 
 
-    public void refuseConnection(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException {
+    public void refuseConnection(SocketHandler s) throws IOException, ClassNotFoundException {
 
         //Set the option
-        response.setOption(2);
+        s.setOption(2);
         //Instantiate the response body
-        response.setFailed();
+        s.setFailed();
         //Set the response
-        write(response, false);
+        write(s, false);
     }
 
-    public void getCA(SocketBody request, SocketBody response) {
+    public void getCA(SocketBody s) {
         //TODO: To send the list of the DA list
-        response.setOption(3);
-        for (Object[] cert_aut : CA.values()) {
-            response.setKey("cert", cert_aut[1]);
-        }
-        response.setSuccess();
+        //s.response.setOption(3);
+        //for (Object[] cert_aut : CA.values()) {
+        //    s.response.setKey("cert", cert_aut[1]);
+        //}
+        //response.setSuccess();
     }
 
-    public boolean checkCode(SocketBody request) {
+    public boolean checkCode(SocketHandler s) {
         //TODO: Check the code
-        String token = (String) request.getKey("token");
-        String code = (String) request.getKey("Code");
-        return tokens.get(token) == code;
+        print("check the code");
+        String token = (String) s.getKey("token");
+        String code = (String) s.getKey("Code");
+        return true;
     }
 
-    public void generateCode(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException {
+    public String[] generateCode(SocketHandler s) throws IOException, ClassNotFoundException {
         //Generate the code and the token
         String token = genSecCode(13);
         String code = genSecCode(13);
-
+        String[] oauth2 = {token, code};
         //Save the information about the generated token
         tokens.put(token, code);
 
         //Set the request body
-        response.setOption(2);
+        s.setOption(1);
 
         //Set new Body
-        response.setNewBody();
+        s.setNewBody();
 
         //Fill the body of the response
-        response.setKey("token", token);
+        s.setKey("token", token);
 
         //Set Success
-        response.setSuccess();
+        s.setSuccess();
         //Set the reponse
-        write(response, false);
+        write(s, false);
+        return oauth2;
     }
 
 
-    public void handleConnectedEquipement(SocketBody request, SocketBody response) throws IOException {
-        switch (request.getOption()) {
+    public void handleConnectedEquipement(SocketHandler s) throws IOException {
+        switch (s.getOption()) {
             case 1:
                 print("Ask for an option of the availabl@es options");
                 break;
             default:
                 print("No known value");
-                close();
+                close(s);
         }
     }
 
-    public void handleNotConnectEquipement(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchAlgorithmException {
-        response.setHeader(request);
-        generateCode(request, response);
-        request = read(true);
-        if (checkCode(request)) {
-            request = read(true);
-            connect(request, response);
-            acceptConnection(request, response);
-        } else {
-            unauthorized(response);
+    public void handleNotConnectEquipement(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException, CertException, OperatorCreationException, InvalidKeySpecException, NoSuchAlgorithmException {
+
+        if (serverDisplay.doYouAccept(s.getSourceName())) {
+            String[] oauth2 = generateCode(s);
+            serverDisplay.codeDisplay(oauth2[0], oauth2[1]);
+            read(s, true);
+            if (checkCode(s)) {
+                serverDisplay.waitForConnection();
+                connect(s);
+                read(s, true);
+                acceptConnection(s);
+                serverDisplay.accepted();
+                serverDisplay.dispose();
+            } else {
+                unauthorized(s);
+                serverDisplay.refused();
+            }
         }
+
     }
 
     public static void main(String[] args) {
-        Server server = new Server(3000);
+        Server server = new Server("host", 3000);
         server.run();
     }
+
     //Check if the neighberhood
-    public boolean doYouKnow(SocketBody request) throws OperatorCreationException, CertException, IOException {
-        if (CA.containsKey(request.getFromPort())) {
-            PublicKey key = PaireClesRSA.deserialize((String) request.getKey("public_key"));
-            Certificat cert = (Certificat) CA.get(request.getFromPort())[1];
+    public boolean doYouKnow(SocketHandler s) throws OperatorCreationException, CertException, IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+        if (CA.containsKey(s.getFromPort())) {
+            PublicKey key = s.getPubKey();
+            Certificat cert = (Certificat) CA.get(s.getFromPort())[1];
             if (cert.verifiCerif(key))
                 return true;
         }
         return false;
     }
 
-    public void doYouTrust(SocketBody request, SocketBody response) throws OperatorCreationException, CertException, IOException {
-        if (isExpired(request)) {
+    public void doYouTrust(SocketHandler s) throws OperatorCreationException, CertException, IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+        if (isExpired(s)) {
 
         } else {
-            if (doYouKnow(request)) {
+            if (doYouKnow(s)) {
                 //We should return true
             } else {
                 Set<Integer> ports = CA.keySet();
                 for (int port : ports) {
-                    if (doYouTrustClientMode(port, request)) {
+                    if (doYouTrustClientMode(port, s)) {
 
                     }
 
@@ -202,7 +239,23 @@ public class Server extends IOOperation {
 
     }
 
-    public boolean doYouTrustClientMode(int port, SocketBody request) {
+    public boolean doYouTrustClientMode(int port, SocketHandler s) {
         return true;
+    }
+
+    public boolean isOn() {
+        return on;
+    }
+
+    public void run() {
+        if (mode_server) {
+            runServer();
+        } else {
+            runClient();
+        }
+    }
+
+    public void switchMode() {
+        mode_server = !mode_server;
     }
 }
