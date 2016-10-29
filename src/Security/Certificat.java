@@ -12,6 +12,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.CertException;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.ContentVerifierProvider;
@@ -103,7 +104,7 @@ public class Certificat {
 
     public static Certificat deserialize(String string) throws IOException {
         StringReader sr = new StringReader(string);
-        PemReader pr = new PemReader(sr);
-        return new Certificat((X509CertificateHolder) pr.readPemObject());
+        PEMParser pr = new PEMParser(sr);
+        return new Certificat((X509CertificateHolder) pr.readObject());
     }
 }

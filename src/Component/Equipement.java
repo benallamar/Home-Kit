@@ -21,15 +21,6 @@ public class Equipement extends Server {
         return this.name == name;
     }
 
-    public void affichage_da() {
-        for (Equipement child : getChilds()) {
-            child.affichage();
-        }
-    }
-
-    public void affichage_ca() {
-        parent.affichage();
-    }
 
     public void affichage() {
         String message = "Component: " + name;
@@ -54,18 +45,20 @@ public class Equipement extends Server {
     }
 
     public Equipement addChildComp(Equipement childComponent) {
-        getChilds().add(childComponent);
         return this;
     }
 
-    public Equipement setParent(Equipement parentComponent) {
-        parent = parentComponent;
-        return this;
+    public void setParent(Equipement parent) {
+        //TODO: Try to fix this one
     }
 
     public Equipement setMonCert(Certificat cert) {
         monCert = cert;
         return this;
+    }
+
+    public HashSet<Equipement> getChilds() {
+        return new HashSet<Equipement>();
     }
 
     public Certificat maCertif() {
@@ -80,18 +73,9 @@ public class Equipement extends Server {
 
     public void run(HashSet<Equipement> systemComponent) {
         //Here We have to establish the communication with the other component
-        if (parent == null) {
-            // we have to run the equipement as a client who is looking for a server to connect with
-        } else {
-            super.run();
-        }
+
+        super.run();
+
     }
 
-	public HashSet<Equipement> getChilds() {
-		return childs;
-	}
-
-	public void setChilds(HashSet<Equipement> childs) {
-		this.childs = childs;
-	}
 }

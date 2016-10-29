@@ -31,7 +31,7 @@ public abstract class IOOperation extends Thread {
     protected HashMap<Integer, Object[]> CA = new HashMap<Integer, Object[]>();
     protected InputStream is = null;
     protected ObjectInputStream ois = null;
-    protected HashMap<Integer, PublicKey> sessions = HashMap < Integer, PublicKey>();
+    protected HashMap<Integer, PublicKey> sessions = new HashMap<Integer, PublicKey>();
     protected SocketBody response;
     protected SocketBody request;
     protected int port;
@@ -39,14 +39,14 @@ public abstract class IOOperation extends Thread {
 
     // @over
     public void write(SocketBody response, boolean encrypt) throws IOException, ClassNotFoundException {
+        response.debug();
         os = socket.getOutputStream();
         oos = new ObjectOutputStream(os);
         //We have to cypher the message before we send it.
         //TODO: Add the PGP Protocol
+        String encryptedMessage = JSONParser.serialize(response);
         if (encrypt) {
-            String
-        } else {
-            String encryptedMessage = JSONParser.serialize(response);
+            //String encryptedMessage = PGPMessage.signEncryptMessage();
         }
         oos.writeObject(encryptedMessage);
         oos.flush();
@@ -81,7 +81,7 @@ public abstract class IOOperation extends Thread {
 
     public void openSession(SocketBody request) {
         //Open the session by adding the information to the sessions base
-        sessions.put(request.getFromPort(), (PublicKey) request.getKey("public_key"))
+        sessions.put(request.getFromPort(), (PublicKey) request.getKey("public_key"));
     }
 
     public void closeSession(SocketBody request) {
@@ -114,7 +114,8 @@ public abstract class IOOperation extends Thread {
         //We update the CA file.
         PublicKey pubKey = getSession(request);
         Certificat cert = Certificat.deserialize((String) request.getKey("cert"));
-        CA.put((Integer) response.getKey("port"),[pubKey, cert]);
+        Object[] trusted_certificat = {pubKey, cert};
+        CA.put((Integer) response.getKey("port"), trusted_certificat);
 
         //We want tell the client the operation has been well
         response.setSuccess();
@@ -123,7 +124,7 @@ public abstract class IOOperation extends Thread {
         write(response, true);
     }
 
-    public void connect(SocketBody request, SocketBody response) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public void connect(SocketBody request, SocketBody response) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, ClassNotFoundException {
         //Set the header of the destination
         response.setHeader(request);
         //Set to the next option of the operation
@@ -138,16 +139,18 @@ public abstract class IOOperation extends Thread {
         //We serialize the certificat and we put it on the body
         response.setKey("cert", Certificat.serialize(certificat));
 
-
         //Set the status for the response
         response.setSuccess();
+
+        //Set the response
+        write(response, false);
     }
 
     public boolean isExpired(SocketBody request) {
         if (CA.containsKey(request.getFromPort())) {
             String lastLog = (String) CA.get(request.getFromPort())[3];
             if (lastLog.equals(request.getSubject()))
-                return 'true;
+                return true;
         }
         return false;
     }

@@ -34,7 +34,7 @@ public class Server extends IOOperation {
             server = new ServerSocket(port);
             maCle = new PaireClesRSA(1024);
             name = "server";
-            response = new SocketBody(name, port);
+            response = new SocketBody(name);
 
         } catch (IOException e) {
             System.out.println("Error 1" + e.getMessage());
@@ -47,7 +47,7 @@ public class Server extends IOOperation {
                 socket = server.accept();
                 request = read(false);
                 //We switch from one user to another.
-                print("You have new connection with the device" + request.getName());
+                print("You have new connection with the device" + request.getSourceName());
                 if (isConnected(request)) {
                     //We check the othe params that his is looking for
                     handleConnectedEquipement(request, response);
@@ -90,7 +90,7 @@ public class Server extends IOOperation {
 
 
     public boolean isConnected(SocketBody request) {
-        return true;
+        return false;
     }
 
 
@@ -98,19 +98,17 @@ public class Server extends IOOperation {
 
         //Set the option
         response.setOption(2);
-
         //Instantiate the response body
         response.setFailed();
-
-        //Add the information to the DA(Not permitted devices
-        DA.put(request.getPort(), getName());
+        //Set the response
+        write(response, false);
     }
 
     public void getCA(SocketBody request, SocketBody response) {
         //TODO: To send the list of the DA list
         response.setOption(3);
-        for (Certificat cert : CA.values()) {
-            response.setKey("cert", cert);
+        for (Object[] cert_aut : CA.values()) {
+            response.setKey("cert", cert_aut[1]);
         }
         response.setSuccess();
     }
@@ -141,15 +139,15 @@ public class Server extends IOOperation {
 
         //Set Success
         response.setSuccess();
-        //Set the response
-        write(response);
+        //Set the reponse
+        write(response, false);
     }
 
 
     public void handleConnectedEquipement(SocketBody request, SocketBody response) throws IOException {
         switch (request.getOption()) {
             case 1:
-                print("Ask for an option of the availables options");
+                print("Ask for an option of the availabl@es options");
                 break;
             default:
                 print("No known value");
@@ -157,14 +155,14 @@ public class Server extends IOOperation {
         }
     }
 
-    public void handleNotConnectEquipement(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public void handleNotConnectEquipement(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchAlgorithmException {
         response.setHeader(request);
         generateCode(request, response);
         request = read(true);
         if (checkCode(request)) {
             request = read(true);
+            connect(request, response);
             acceptConnection(request, response);
-            write(response);
         } else {
             unauthorized(response);
         }
@@ -174,8 +172,8 @@ public class Server extends IOOperation {
         Server server = new Server(3000);
         server.run();
     }
-
-    public boolean doYouKnow(SocketBody request) throws OperatorCreationException, CertException {
+    //Check if the neighberhood
+    public boolean doYouKnow(SocketBody request) throws OperatorCreationException, CertException, IOException {
         if (CA.containsKey(request.getFromPort())) {
             PublicKey key = PaireClesRSA.deserialize((String) request.getKey("public_key"));
             Certificat cert = (Certificat) CA.get(request.getFromPort())[1];
@@ -185,7 +183,7 @@ public class Server extends IOOperation {
         return false;
     }
 
-    public void doYouTrust(SocketBody request, SocketBody response) {
+    public void doYouTrust(SocketBody request, SocketBody response) throws OperatorCreationException, CertException, IOException {
         if (isExpired(request)) {
 
         } else {
@@ -204,7 +202,7 @@ public class Server extends IOOperation {
 
     }
 
-    public boolean doYouTrustClientMode(int port, SocketBody request {
+    public boolean doYouTrustClientMode(int port, SocketBody request) {
         return true;
     }
 }

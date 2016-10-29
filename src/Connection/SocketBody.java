@@ -69,7 +69,6 @@ public final class SocketBody {
     }
 
     public void setOption(int option) {
-        int[]
         this.option = option;
     }
 
@@ -96,5 +95,9 @@ public final class SocketBody {
     public void setHeader(SocketBody request) {
         to = request.from;
         from = request.to;
+    }
+
+    public void debug() {
+        System.out.println(getBody().toString());
     }
 }

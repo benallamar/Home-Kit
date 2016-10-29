@@ -1,6 +1,7 @@
 package Security;
 
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.bouncycastle.util.io.pem.PemWriter;
@@ -49,28 +50,20 @@ public class PaireClesRSA {
         return serialize;
     }
 
-    public static String serialize(PaireClesRSA key) {
-        try {
-            StringWriter sw = new StringWriter();
-            PemWriter pw = new PemWriter(sw);
-            pw.writeObject(new JcaMiscPEMGenerator(key.pubKey()));
-            pw.flush();
-            pw.close();
-            return pw.toString();
-        } catch (IOException e) {
-            System.out.println(e.getLocalizedMessage());
-        }
+    public static String serialize(PaireClesRSA key) throws IOException {
+        StringWriter sw = new StringWriter();
+        PemWriter pw = new PemWriter(sw);
+        pw.writeObject(new JcaMiscPEMGenerator(key.pubKey()));
+        pw.flush();
+        pw.close();
+        return pw.toString();
 
     }
 
-    public static PublicKey deserialize(String pem_format) {
-        try {
-            StringReader sr = new StringReader(pem_format);
-            PemReader pr = new PemReader(sr);
-            return new Certificat((PublicKey) pr.readPemObject());
-        } catch (IOException e) {
-            System.out.println(e.getLocalizedMessage());
-        }
+    public static PublicKey deserialize(String pem_format) throws IOException {
+        StringReader sr = new StringReader(pem_format);
+        PEMParser pr = new PEMParser(sr);
+        return (PublicKey) pr.readObject();
 
     }
 
