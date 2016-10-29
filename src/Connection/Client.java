@@ -5,6 +5,8 @@ import Security.PaireClesRSA;
 
 import java.io.*;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 
 /**
@@ -32,97 +34,57 @@ public class Client extends IOOperation implements Runnable {
             //Display the message of waiting connection
             print("Connexion en cours ...");
             //We have to check if is not connected.
-            connect(response);
-            write(response);
-            SocketBody request = read();
-            if (request.isSuccess()) {
-                switch (request.getOption()) {
-                    case 1:
-                        print("Certificat Delivrance ...");
+            ack(response);
+            //Get the response from the server
+            request = read(true);
+            response.setHeader(request);
+            //Handle the response
+            switch (request.getOption()) {
+                case 1:
+                    sendCode(request, response);
+                    request = read(true);
+                    if (request.isSuccess()) {
                         acceptConnection(request, response);
-                        write(request);
-                        print("connection has been established between the two component");
-                        response = read();
-                        print(response.getBody().toString());
-                        break;
-                    case 2:
-                        //Get the CA Informations
-                        print("Get the component CA");
-                        getCA(request, response);
-                        write(response);
-                        break;
-                    case 3:
-                        //Get the DA information
-                        print("Get the componenet DA");
-                        getDA(request, response);
-                        write(response);
-                        break;
-                    case 4:
-                        doYouTrust(request, response);
-                        write(response);
-                        /* Other options could */
-                    case 5:
-                        sendCode(request, response);
-                        break;
-                    case 6:
-                        print("Check the checksum code");
-                        checkCode(request, response);
-                        write(response);
-                    default:
-                        print("Connection refused");
-                }
-            } else {
-                print("Error on the server");
+                        connect(request, response);
+                        close();
+                    } else {
+                        close();
+
+                    }
+                    break;
+                default:
+                    print("Unknow request");
+                    close();
             }
 
             close();
-        } catch (IOException e) {
+        } catch (IOException e)
+
+        {
             System.out.println("Error 2" + e.getMessage());
-        } catch (
-                ClassNotFoundException e)
+            errors.add(e.getLocalizedMessage());
+
+        } catch (ClassNotFoundException e)
 
         {
             System.out.println("Error 3" + e.getMessage());
+            errors.add(e.getLocalizedMessage());
+
+        } catch (InvalidKeySpecException e)
+
+        {
+            System.out.println("Error 4" + e.getMessage());
+            errors.add(e.getLocalizedMessage());
+
+        } catch (NoSuchAlgorithmException e)
+
+        {
+            System.out.println("Error 5" + e.getMessage());
+            errors.add(e.getLocalizedMessage());
+
         }
     }
 
-    public boolean connect(SocketBody response) {
-
-        //First we set the option of the communication to tell the server the reason of this communication
-        response.setOption(1);
-
-        //Instantiate the body of our request.
-        response.setNewBody();
-
-        //We have to send the certificate to the server so he could create for as a kind of certificate
-        response.setKey("public_key", maCle.serialize());
-
-        //Set that the operation has been done
-        response.setSuccess();
-
-        //And return True as every thing is write
-        return true;
-    }
-
-
-    public boolean acceptConnection(SocketBody request, SocketBody response) {
-        //Set the response ...
-        response.setOption(2);
-
-        //Instantiate the body
-        response.setNewBody();
-
-        //We generate the certificat for the user ...
-
-        response.setKey("certificat", "Some Certificat");
-        //We add the certificat to the CA
-
-        //Set the response as correct
-        response.setSuccess();
-
-        //And return True
-        return true;
-    }
 
     public void sendCode(SocketBody request, SocketBody response) {
         //Set the option of the response
@@ -141,14 +103,13 @@ public class Client extends IOOperation implements Runnable {
 
     }
 
+    public void ack(SocketBody response) {
+        //We have to make an acknowledge to the server
+        response.
+    }
+
     public static void main(String[] args) {
 
         new Client("localhost", 3000).run();
-    }
-
-    public boolean doYouTrust(SocketBody request, SocketBody response) {
-        //We use this to implement the function doYouTrustThisEquipement
-        //So we need to send the certification that he has we other.
-        return true;
     }
 }

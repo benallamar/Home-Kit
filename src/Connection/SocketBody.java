@@ -8,21 +8,44 @@ import java.util.HashMap;
 public final class SocketBody {
     private int status = 200;
     private int option = 1;
-    private String name;
-    private int port;
+    private String sourceName;
+    private String subject;
+    private int from;
+    private int to;
     private HashMap<String, Object> body = new HashMap<String, Object>();
 
-    public SocketBody(String name, int port) {
-        this.name = name;
-        this.port = port;
+    public SocketBody(String sourceName) {
+        this.sourceName = sourceName;
     }
 
-    public String getName() {
-        return name;
+    public void setSubject(String subject) {
+        this.subject = subject;
     }
 
-    public int getPort() {
-        return port;
+    public String getSubject() {
+        return subject;
+    }
+
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public int getFromPort() {
+        return from;
+    }
+
+    public int getToPort() {
+        return to;
+    }
+
+    public void setFromPort(int port) {
+        //We set the port Sender
+        from = port;
+    }
+
+    public void setToPort(int port) {
+        //We set the port of destination
+        to = port;
     }
 
     public boolean isSuccess() {
@@ -68,5 +91,10 @@ public final class SocketBody {
 
     public void setKey(String key, Object object) {
         body.put(key, object);
+    }
+
+    public void setHeader(SocketBody request) {
+        to = request.from;
+        from = request.to;
     }
 }

@@ -63,7 +63,7 @@ public class PaireClesRSA {
 
     }
 
-    public static PublicKey desrialize(String pem_format) {
+    public static PublicKey deserialize(String pem_format) {
         try {
             StringReader sr = new StringReader(pem_format);
             PemReader pr = new PemReader(sr);

@@ -3,16 +3,17 @@ package Connection;
 import Security.Certificat;
 import Security.PaireClesRSA;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+import org.bouncycastle.cert.CertException;
+import org.bouncycastle.operator.OperatorCreationException;
 
 import java.io.*;
-import java.math.BigInteger;
 import java.net.ServerSocket;
-import java.security.KeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * Created by marouanebenalla on 07/10/2016.
@@ -25,8 +26,6 @@ For server there are four main option:
  */
 public class Server extends IOOperation {
     protected int port = 12345;
-    protected SocketBody response;
-    protected SocketBody request;
     HashMap<String, String> tokens = new HashMap<String, String>();
     LinkedList<String> errors = new LinkedList<String>();
 
@@ -46,111 +45,54 @@ public class Server extends IOOperation {
         try {
             while (true) {
                 socket = server.accept();
-                request = read();
+                request = read(false);
                 //We switch from one user to another.
                 print("You have new connection with the device" + request.getName());
-                if (isConnected(request, response)) {
+                if (isConnected(request)) {
                     //We check the othe params that his is looking for
-                    switch (request.getOption()) {
-                        case 2:
-                            print("Get the component CA");
-                            sendCA(request, response);
-                            write(response);
-                            break;
-                        default:
-                            print("Option not recognized");
+                    handleConnectedEquipement(request, response);
 
-                    }
                 } else {
                     //We have to try to connect it to the server or cancel the connection
-                    generateCode(request, response);
-                    request = read();
-                    if (checkCode(request)) {
-                        connect(request, response);
-                        acceptConnection(read(), response);
-                    } else {
-                        unauthorized(response);
-                    }
-
+                    handleNotConnectEquipement(request, response);
                 }
                 close();
+
             }
-        } catch (
-                IOException e)
+
+        } catch (IOException e)
 
         {
             System.out.println("Error 2" + e.getMessage());
-            errors.add(e.getLocalizedMessage())
+            errors.add(e.getLocalizedMessage());
 
-        } catch (
-                ClassNotFoundException e)
+        } catch (ClassNotFoundException e)
 
         {
             System.out.println("Error 3" + e.getMessage());
-            errors.add(e.getLocalizedMessage())
+            errors.add(e.getLocalizedMessage());
 
-        } catch (
-                InvalidKeySpecException e)
+        } catch (InvalidKeySpecException e)
 
         {
             System.out.println("Error 4" + e.getMessage());
-            errors.add(e.getLocalizedMessage())
+            errors.add(e.getLocalizedMessage());
 
-        } catch (
-                NoSuchAlgorithmException e)
+        } catch (NoSuchAlgorithmException e)
 
         {
             System.out.println("Error 5" + e.getMessage());
-            errors.add(e.getLocalizedMessage())
+            errors.add(e.getLocalizedMessage());
 
         }
 
     }
 
+
     public boolean isConnected(SocketBody request) {
         return true;
     }
 
-    public void connect(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException {
-        //we set the option to get the write from the server
-        response.setOption(1);
-
-        //Set the response body
-        response.setNewBody();
-
-        //Set the body of the connections
-        response.setKey("public_key", maCle.pubKey().toString());
-
-        //We want tell the client the operation has been well
-        response.setSuccess();
-
-        //Set the response
-        write(response);
-    }
-
-    public void acceptConnection(SocketBody request, SocketBody response) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-
-
-        //Set to the next option of the operation
-        response.setOption(1);
-
-        //Instantiate the body of the response
-        response.setNewBody();
-
-        //We generate the certificate after accepting the connection
-        PublicKey pubKey = PaireClesRSA.desrialize((String) request.getKey("public_key"));
-        Certificat certificat = new Certificat(name, pubKey, maCle.privKey(), 356);
-
-        //We serialize the certificat and we put it on the body
-        response.setKey("certificate", Certificat.serialize(certificat));
-
-        //We update the CA file.
-        CA.put((Integer) response.getKey("port"),[pubKey, certificat]);
-
-        //Set the status for the response
-        response.setSuccess();
-
-    }
 
     public void refuseConnection(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException {
 
@@ -162,26 +104,6 @@ public class Server extends IOOperation {
 
         //Add the information to the DA(Not permitted devices
         DA.put(request.getPort(), getName());
-    }
-
-    public void trust(SocketBody request, SocketBody response) {
-        //And we have to see if we trust any of the following
-
-
-    }
-
-    public boolean doYouTrust(SocketBody request, SocketBody response) {
-        //TODO:Creating the algorithm handling request routing
-        return true;
-    }
-
-    public void getDA(SocketBody request, SocketBody response) {
-        //TODO: Get the list of the CA list
-        response.setOption(3);
-        for (Certificat cert : DA.values()) {
-            response.setKey("cert", cert);
-        }
-        response.setSuccess();
     }
 
     public void getCA(SocketBody request, SocketBody response) {
@@ -223,17 +145,66 @@ public class Server extends IOOperation {
         write(response);
     }
 
-    public void unauthorized(SocketBody response) throws IOException, ClassNotFoundException {
-        //set the option that you have and error and close the connection
-        response.setNewBody();
-        response.setFailed();
-        //Send the response and close the socket after
-        write(response);
-        close();
+
+    public void handleConnectedEquipement(SocketBody request, SocketBody response) throws IOException {
+        switch (request.getOption()) {
+            case 1:
+                print("Ask for an option of the availables options");
+                break;
+            default:
+                print("No known value");
+                close();
+        }
+    }
+
+    public void handleNotConnectEquipement(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
+        response.setHeader(request);
+        generateCode(request, response);
+        request = read(true);
+        if (checkCode(request)) {
+            request = read(true);
+            acceptConnection(request, response);
+            write(response);
+        } else {
+            unauthorized(response);
+        }
     }
 
     public static void main(String[] args) {
         Server server = new Server(3000);
         server.run();
+    }
+
+    public boolean doYouKnow(SocketBody request) throws OperatorCreationException, CertException {
+        if (CA.containsKey(request.getFromPort())) {
+            PublicKey key = PaireClesRSA.deserialize((String) request.getKey("public_key"));
+            Certificat cert = (Certificat) CA.get(request.getFromPort())[1];
+            if (cert.verifiCerif(key))
+                return true;
+        }
+        return false;
+    }
+
+    public void doYouTrust(SocketBody request, SocketBody response) {
+        if (isExpired(request)) {
+
+        } else {
+            if (doYouKnow(request)) {
+                //We should return true
+            } else {
+                Set<Integer> ports = CA.keySet();
+                for (int port : ports) {
+                    if (doYouTrustClientMode(port, request)) {
+
+                    }
+
+                }
+            }
+        }
+
+    }
+
+    public boolean doYouTrustClientMode(int port, SocketBody request {
+        return true;
     }
 }
