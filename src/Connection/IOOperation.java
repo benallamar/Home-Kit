@@ -1,18 +1,18 @@
 package Connection;
 
 import java.io.*;
-import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 
 import Console.JSONParser;
-import Security.Certificat;
-import Security.PaireClesRSA;
+import HomeSecurityLayer.Certificat;
+import HomeSecurityLayer.PaireClesRSA;
+import org.bouncycastle.cert.CertException;
+import org.bouncycastle.operator.OperatorCreationException;
 
 import java.util.LinkedList;
 import java.util.UUID;
@@ -58,12 +58,15 @@ public abstract class IOOperation extends Thread {
         //We have to decypher the gotten message
         //TODO : Add the PGP protocol here
         String decryptedMessage = (String) ois.readObject();
-        System.out.println(JSONParser.deserialize(decryptedMessage).toString());
         return JSONParser.deserialize(decryptedMessage);
     }
 
     public void print(String string) {
         System.out.println(string);
+    }
+
+    public void print(int number) {
+        System.out.println(number);
     }
 
     public void close() throws IOException {
@@ -79,9 +82,11 @@ public abstract class IOOperation extends Thread {
 
     }
 
-    public void openSession(SocketBody request) {
+    public void openSession(SocketBody request) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+        //Deserialize the key
+        PublicKey pub_client = request.getPubKey();
         //Open the session by adding the information to the sessions base
-        sessions.put(request.getFromPort(), (PublicKey) request.getKey("public_key"));
+        sessions.put(request.getFromPort(), pub_client);
     }
 
     public void closeSession(SocketBody request) {
@@ -99,10 +104,9 @@ public abstract class IOOperation extends Thread {
         response.setFailed();
         //Send the response and close the socket after
         write(response, true);
-        close();
     }
 
-    public void acceptConnection(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException {
+    public void acceptConnection(SocketBody request, SocketBody response) throws OperatorCreationException, IOException, ClassNotFoundException, CertException {
         //we set the option to get the write from the server
         response.setOption(1);
 
@@ -113,15 +117,15 @@ public abstract class IOOperation extends Thread {
 
         //We update the CA file.
         PublicKey pubKey = getSession(request);
-        Certificat cert = Certificat.deserialize((String) request.getKey("cert"));
+        Certificat cert = request.getCertificat();
         Object[] trusted_certificat = {pubKey, cert};
-        CA.put((Integer) response.getKey("port"), trusted_certificat);
-
-        //We want tell the client the operation has been well
-        response.setSuccess();
-
-        //Set the response
-        write(response, true);
+        System.out.print(request.cert);
+        if (cert.verifiCerif(pubKey)) {
+            CA.put(response.getFromPort(), trusted_certificat);
+            response.setSuccess();
+        } else {
+            response.setFailed();
+        }
     }
 
     public void connect(SocketBody request, SocketBody response) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, ClassNotFoundException {
@@ -134,11 +138,8 @@ public abstract class IOOperation extends Thread {
 
         //We generate the certificate after accepting the connection
         PublicKey pubKey = getSession(request);
-        Certificat certificat = new Certificat(name, pubKey, maCle.privKey(), 356);
-
-        //We serialize the certificat and we put it on the body
-        response.setKey("cert", Certificat.serialize(certificat));
-
+        response.setCertificat(new Certificat(name, pubKey, maCle.privKey(), 356));
+        print(response.getCertificat().toString());
         //Set the status for the response
         response.setSuccess();
 

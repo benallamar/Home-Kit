@@ -1,20 +1,16 @@
-package Security;
+package HomeSecurityLayer;
 
-import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
-import org.bouncycastle.util.io.pem.PemReader;
+import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.math.BigInteger;
 import java.security.*;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPublicKeySpec;
-import java.util.HashMap;
+import java.security.spec.X509EncodedKeySpec;
 
 /**
  * Created by bubble on 04/10/2016.
@@ -43,27 +39,21 @@ public class PaireClesRSA {
         return key.getPrivate();
     }
 
-    public HashMap<String, String> serialize() {
-        HashMap<String, String> serialize = new HashMap<String, String>();
-        serialize.put("modulus", ((RSAPublicKey) key.getPublic()).getPublicExponent().toString());
-        serialize.put("exponent", ((RSAPublicKey) key.getPublic()).getModulus().toString());
-        return serialize;
-    }
 
     public static String serialize(PaireClesRSA key) throws IOException {
-        StringWriter sw = new StringWriter();
-        PemWriter pw = new PemWriter(sw);
-        pw.writeObject(new JcaMiscPEMGenerator(key.pubKey()));
-        pw.flush();
-        pw.close();
-        return pw.toString();
-
+        PublicKey publicKey = key.pubKey();
+        StringWriter writer = new StringWriter();
+        PemWriter pemWriter = new PemWriter(writer);
+        pemWriter.writeObject(new PemObject("PUBLIC KEY", publicKey.getEncoded()));
+        pemWriter.flush();
+        pemWriter.close();
+        return writer.toString();
     }
 
-    public static PublicKey deserialize(String pem_format) throws IOException {
+    public static PublicKey deserialize(String pem_format) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         StringReader sr = new StringReader(pem_format);
         PEMParser pr = new PEMParser(sr);
-        return (PublicKey) pr.readObject();
+        return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(((SubjectPublicKeyInfo) pr.readObject()).getEncoded()));
 
     }
 

@@ -1,13 +1,14 @@
 package Connection;
 
 
-import Security.PaireClesRSA;
+import HomeSecurityLayer.PaireClesRSA;
+import org.bouncycastle.cert.CertException;
+import org.bouncycastle.operator.OperatorCreationException;
 
 import java.io.*;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.HashMap;
 
 /**
  * Created by marouanebenalla on 07/10/2016.
@@ -33,11 +34,15 @@ public class Client extends IOOperation implements Runnable {
             SocketBody response = new SocketBody(name);
             //Display the message of waiting connection
             print("Connexion en cours ...");
+            //Set the public Key to decipher the code
+            response.setPublicKey(maCle);
             //We have to check if is not connected.
             ack(response);
-            write(response, false);
             //Get the response from the server
             request = read(true);
+            //Create the session for that user
+            openSession(request);
+            //Set the header of the response
             response.setHeader(request);
             //Handle the response
             switch (request.getOption()) {
@@ -45,9 +50,10 @@ public class Client extends IOOperation implements Runnable {
                     sendCode(request, response);
                     request = read(true);
                     if (request.isSuccess()) {
+                        print("connect");
                         acceptConnection(request, response);
                         connect(request, response);
-                        close();
+                        print("connection finished");
                     } else {
                         close();
                     }
@@ -65,6 +71,18 @@ public class Client extends IOOperation implements Runnable {
             errors.add(e.getLocalizedMessage());
 
         } catch (ClassNotFoundException e)
+
+        {
+            System.out.println("Error 3" + e.getMessage());
+            errors.add(e.getLocalizedMessage());
+
+        } catch (OperatorCreationException e)
+
+        {
+            System.out.println("Error 3" + e.getMessage());
+            errors.add(e.getLocalizedMessage());
+
+        } catch (CertException e)
 
         {
             System.out.println("Error 3" + e.getMessage());
@@ -94,7 +112,7 @@ public class Client extends IOOperation implements Runnable {
         response.setNewBody();
 
         //Fill the body of the response
-        response.setKey("token", "qsdckmnlkrjfn");
+        response.setKey("token", request.getKey("token"));
         response.setKey("code", 12454);
 
         //Set that has been succeed
@@ -108,11 +126,10 @@ public class Client extends IOOperation implements Runnable {
         response.setOption(0);
         //Instantiate the body of the response
         response.setNewBody();
-        //Send the public Key
-        response.setKey("public_key", maCle.serialize());
         //Set the response
         write(response, false);
     }
+
     public static void main(String[] args) {
 
         new Client("localhost", 3000).run();

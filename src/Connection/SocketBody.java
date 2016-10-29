@@ -1,6 +1,14 @@
 package Connection;
 
+import HomeSecurityLayer.Certificat;
+import HomeSecurityLayer.PaireClesRSA;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
+
 
 /**
  * Project Name : TL_crypto
@@ -13,6 +21,8 @@ public final class SocketBody {
     private int from;
     private int to;
     private HashMap<String, Object> body = new HashMap<String, Object>();
+    private String public_key;
+    public String cert;
 
     public SocketBody(String sourceName) {
         this.sourceName = sourceName;
@@ -99,5 +109,21 @@ public final class SocketBody {
 
     public void debug() {
         System.out.println(getBody().toString());
+    }
+
+    public void setPublicKey(PaireClesRSA key) throws IOException {
+        public_key = PaireClesRSA.serialize(key);
+    }
+
+    public PublicKey getPubKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        return PaireClesRSA.deserialize(public_key);
+    }
+
+    public void setCertificat(Certificat certificat) throws IOException {
+        cert = Certificat.serialize(certificat);
+    }
+
+    public Certificat getCertificat() throws IOException {
+        return Certificat.deserialize(cert);
     }
 }

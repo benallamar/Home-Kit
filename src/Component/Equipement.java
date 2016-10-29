@@ -1,8 +1,7 @@
 package Component;
 
 import Connection.Server;
-import Security.Certificat;
-import Security.PaireClesRSA;
+import HomeSecurityLayer.Certificat;
 
 import java.security.PublicKey;
 import java.util.HashSet;
@@ -28,7 +27,8 @@ public class Equipement extends Server {
     }
 
     public String name() {
-        return name;
+
+        return name + "\n\n" + port;
     }
 
     public PublicKey maClePub() {
@@ -37,10 +37,6 @@ public class Equipement extends Server {
     }
 
     public Equipement setCertificateForChild(Equipement childComponent) {
-        childComponent
-                .setMonCert(new Certificat(name, maCle, 365)) //Create the certificate
-                .setParent(this);//Add to Parent
-        this.addChildComp(childComponent);
         return this;
     }
 
@@ -76,6 +72,10 @@ public class Equipement extends Server {
 
         super.run();
 
+    }
+
+    public int getPort() {
+        return port;
     }
 
 }

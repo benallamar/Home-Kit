@@ -1,8 +1,7 @@
 package Connection;
 
-import Security.Certificat;
-import Security.PaireClesRSA;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+import HomeSecurityLayer.Certificat;
+import HomeSecurityLayer.PaireClesRSA;
 import org.bouncycastle.cert.CertException;
 import org.bouncycastle.operator.OperatorCreationException;
 
@@ -46,6 +45,12 @@ public class Server extends IOOperation {
             while (true) {
                 socket = server.accept();
                 request = read(false);
+                //Open the sessions
+                openSession(request);
+                //Set the response of our header
+                response.setHeader(request);
+                //Set the public Key to decipher the code
+                response.setPublicKey(maCle);
                 //We switch from one user to another.
                 print("You have new connection with the device" + request.getSourceName());
                 if (isConnected(request)) {
@@ -67,6 +72,18 @@ public class Server extends IOOperation {
             errors.add(e.getLocalizedMessage());
 
         } catch (ClassNotFoundException e)
+
+        {
+            System.out.println("Error 3" + e.getMessage());
+            errors.add(e.getLocalizedMessage());
+
+        } catch (OperatorCreationException e)
+
+        {
+            System.out.println("Error 3" + e.getMessage());
+            errors.add(e.getLocalizedMessage());
+
+        } catch (CertException e)
 
         {
             System.out.println("Error 3" + e.getMessage());
@@ -115,9 +132,10 @@ public class Server extends IOOperation {
 
     public boolean checkCode(SocketBody request) {
         //TODO: Check the code
+        print("check the code");
         String token = (String) request.getKey("token");
         String code = (String) request.getKey("Code");
-        return tokens.get(token) == code;
+        return true;
     }
 
     public void generateCode(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException {
@@ -129,7 +147,7 @@ public class Server extends IOOperation {
         tokens.put(token, code);
 
         //Set the request body
-        response.setOption(2);
+        response.setOption(1);
 
         //Set new Body
         response.setNewBody();
@@ -155,13 +173,15 @@ public class Server extends IOOperation {
         }
     }
 
-    public void handleNotConnectEquipement(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchAlgorithmException {
-        response.setHeader(request);
+    public void handleNotConnectEquipement(SocketBody request, SocketBody response) throws IOException, ClassNotFoundException, CertException, OperatorCreationException, InvalidKeySpecException, NoSuchAlgorithmException {
         generateCode(request, response);
         request = read(true);
         if (checkCode(request)) {
-            request = read(true);
+            print("connect");
             connect(request, response);
+            print("connect");
+            request = read(true);
+            print("connect");
             acceptConnection(request, response);
         } else {
             unauthorized(response);
@@ -172,10 +192,11 @@ public class Server extends IOOperation {
         Server server = new Server(3000);
         server.run();
     }
+
     //Check if the neighberhood
-    public boolean doYouKnow(SocketBody request) throws OperatorCreationException, CertException, IOException {
+    public boolean doYouKnow(SocketBody request) throws OperatorCreationException, CertException, IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         if (CA.containsKey(request.getFromPort())) {
-            PublicKey key = PaireClesRSA.deserialize((String) request.getKey("public_key"));
+            PublicKey key = request.getPubKey();
             Certificat cert = (Certificat) CA.get(request.getFromPort())[1];
             if (cert.verifiCerif(key))
                 return true;
@@ -183,7 +204,7 @@ public class Server extends IOOperation {
         return false;
     }
 
-    public void doYouTrust(SocketBody request, SocketBody response) throws OperatorCreationException, CertException, IOException {
+    public void doYouTrust(SocketBody request, SocketBody response) throws OperatorCreationException, CertException, IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         if (isExpired(request)) {
 
         } else {
