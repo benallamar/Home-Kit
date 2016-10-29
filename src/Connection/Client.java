@@ -42,7 +42,8 @@ public class Client extends IOOperation implements Runnable {
             switch (request.getOption()) {
                 case 1:
                     sendCode(request, response);
-                    request = read(true);
+                    requ
+                            est = read(true);
                     if (request.isSuccess()) {
                         acceptConnection(request, response);
                         connect(request, response);
