@@ -21,44 +21,22 @@ import java.util.UUID;
  * Project Name : TL_crypto
  */
 public abstract class IOOperation extends Thread {
-    protected Socket socket = null;
     protected ServerSocket server = null;
     protected PaireClesRSA maCle;
     protected Certificat monCert;
     protected String name;
-    protected OutputStream os = null;
-    protected ObjectOutputStream oos = null;
     protected HashMap<Integer, Object[]> CA = new HashMap<Integer, Object[]>();
-    protected InputStream is = null;
-    protected ObjectInputStream ois = null;
     protected HashMap<Integer, PublicKey> sessions = new HashMap<Integer, PublicKey>();
-    protected SocketBody response;
-    protected SocketBody request;
     protected int port;
     protected LinkedList<String> errors = new LinkedList<String>();
 
     // @over
-    public void write(SocketBody response, boolean encrypt) throws IOException, ClassNotFoundException {
-        response.debug();
-        os = socket.getOutputStream();
-        oos = new ObjectOutputStream(os);
-        //We have to cypher the message before we send it.
-        //TODO: Add the PGP Protocol
-        String encryptedMessage = JSONParser.serialize(response);
-        if (encrypt) {
-            //String encryptedMessage = PGPMessage.signEncryptMessage();
-        }
-        oos.writeObject(encryptedMessage);
-        oos.flush();
+    public void write(SocketHandler s, boolean encrypt) throws IOException, ClassNotFoundException {
+        s.write(maCle, encrypt);
     }
 
-    public SocketBody read(boolean decrypt) throws IOException, ClassNotFoundException {
-        is = socket.getInputStream();
-        ois = new ObjectInputStream(is);
-        //We have to decypher the gotten message
-        //TODO : Add the PGP protocol here
-        String decryptedMessage = (String) ois.readObject();
-        return JSONParser.deserialize(decryptedMessage);
+    public void read(SocketHandler s, boolean decrypt) throws IOException, ClassNotFoundException {
+        s.read(maCle, decrypt);
     }
 
     public void print(String string) {
@@ -69,12 +47,8 @@ public abstract class IOOperation extends Thread {
         System.out.println(number);
     }
 
-    public void close() throws IOException {
-        os.close();
-        oos.close();
-        is.close();
-        ois.close();
-        socket.close();
+    public void close(SocketHandler s) throws IOException {
+        s.close();
     }
 
     public String genSecCode(int length) {
@@ -82,77 +56,95 @@ public abstract class IOOperation extends Thread {
 
     }
 
+<<<<<<<HEAD
+
     public void openSession(SocketBody request) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         //Deserialize the key
         PublicKey pub_client = request.getPubKey();
         //Open the session by adding the information to the sessions base
         sessions.put(request.getFromPort(), pub_client);
-    }
+=======
+        public void openSession (SocketHandler s) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException
+        {
+            //Deserialize the key
+            PublicKey pub_client = s.request.getPubKey();
+            //Open the session by adding the information to the sessions base
+            sessions.put(s.getFromPort(), pub_client);
+>>>>>>>7 a6243510962f4572971285ac0623e07e60fb030
+        }
 
     public void closeSession(SocketBody request) {
         //Remove the key of the sessions
         sessions.remove(request.getFromPort());
     }
 
-    public PublicKey getSession(SocketBody request) {
-        return sessions.get(request.getFromPort());
+    public PublicKey getSession(SocketHandler s) {
+        return sessions.get(s.getFromPort());
     }
 
-    public void unauthorized(SocketBody response) throws IOException, ClassNotFoundException {
+    public void unauthorized(SocketHandler s) throws IOException, ClassNotFoundException {
         //set the option that you have and error and close the connection
-        response.setNewBody();
-        response.setFailed();
+        s.response.setNewBody();
+        s.response.setFailed();
         //Send the response and close the socket after
-        write(response, true);
+
+        write(s, false);
     }
 
-    public void acceptConnection(SocketBody request, SocketBody response) throws OperatorCreationException, IOException, ClassNotFoundException, CertException {
+    public void acceptConnection(SocketHandler s) throws OperatorCreationException, IOException, ClassNotFoundException, CertException {
         //we set the option to get the write from the server
-        response.setOption(1);
+        s.response.setOption(1);
 
         //Set the response body
-        response.setNewBody();
+        s.response.setNewBody();
 
         //Set the body of the connections
 
         //We update the CA file.
-        PublicKey pubKey = getSession(request);
-        Certificat cert = request.getCertificat();
+        PublicKey pubKey = getSession(s);
+        Certificat cert = s.request.getCertificat();
         Object[] trusted_certificat = {pubKey, cert};
-        System.out.print(request.cert);
+        System.out.print(s.request.cert);
         if (cert.verifiCerif(pubKey)) {
-            CA.put(response.getFromPort(), trusted_certificat);
-            response.setSuccess();
+            CA.put(s.response.getFromPort(), trusted_certificat);
+            s.response.setSuccess();
         } else {
-            response.setFailed();
+            s.response.setFailed();
         }
     }
 
-    public void connect(SocketBody request, SocketBody response) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, ClassNotFoundException {
+    public void connect(SocketHandler s) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, ClassNotFoundException {
         //Set the header of the destination
-        response.setHeader(request);
+        s.response.setHeader(s.request);
         //Set to the next option of the operation
-        response.setOption(1);
+        s.response.setOption(1);
         //Instantiate the body of the response
-        response.setNewBody();
+        s.response.setNewBody();
 
         //We generate the certificate after accepting the connection
-        PublicKey pubKey = getSession(request);
-        response.setCertificat(new Certificat(name, pubKey, maCle.privKey(), 356));
-        print(response.getCertificat().toString());
+        PublicKey pubKey = getSession(s);
+        s.response.setCertificat(new Certificat(name, pubKey, maCle.privKey(), 356));
+        print(s.response.getCertificat().toString());
         //Set the status for the response
-        response.setSuccess();
+        s.response.setSuccess();
 
         //Set the response
-        write(response, false);
+        write(s, false);
     }
 
-    public boolean isExpired(SocketBody request) {
-        if (CA.containsKey(request.getFromPort())) {
-            String lastLog = (String) CA.get(request.getFromPort())[3];
-            if (lastLog.equals(request.getSubject()))
+    public boolean isExpired(SocketHandler s) {
+        if (CA.containsKey(s.request.getFromPort())) {
+            String lastLog = (String) CA.get(s.getFromPort())[3];
+            if (lastLog.equals(s.getSubject()))
                 return true;
         }
         return false;
+    }
+
+    public void update() {
+    }
+
+    public int getPort() {
+        return port;
     }
 }
