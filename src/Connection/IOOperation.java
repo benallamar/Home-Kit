@@ -12,6 +12,7 @@ import Console.JSONParser;
 import HomeSecurityLayer.Certificat;
 import HomeSecurityLayer.PaireClesRSA;
 import org.bouncycastle.cert.CertException;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.operator.OperatorCreationException;
 
 import java.util.LinkedList;
@@ -144,4 +145,33 @@ public abstract class IOOperation extends Thread {
         mode_server = !mode_server;
     }
 
+    //To avoid the man in the middle
+    public static String[] genKeyToken(PublicKey key) {
+        RSAKeyParameters pubParams = (RSAKeyParameters) key;
+        String modulus = pubParams.getModulus().toString();
+        int longueur = modulus.length();
+        String token = "", message = "", code = "";
+        for (int i = 0; i < 12; i++) {
+            int position = ((Double) (Math.random() * longueur)).intValue();
+            token += Integer.toHexString(position);
+            code += Integer.toHexString(position).length();
+            message += modulus.charAt(position);
+        }
+        return new String[]{token, code, message};
+    }
+
+    //Decode the message
+    public static String genKeyMessage(PublicKey key, String token, String code) {
+        RSAKeyParameters pubParams = (RSAKeyParameters) key;
+        String modulus = pubParams.getModulus().toString();
+        String message = "";
+        int k = 0;
+        for (int i = 0; i < code.length(); i++) {
+            int length = (int) code.charAt(i);
+            int pos = Integer.parseInt(token.substring(k, k + i));
+            message += modulus.charAt(pos);
+            k += i + 1;
+        }
+        return message;
+    }
 }

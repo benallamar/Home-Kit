@@ -25,7 +25,6 @@ For server there are four main option:
     3- Do you trust the equipement with the given id.
  */
 public class Server extends Client {
-    HashMap<String, String> tokens = new HashMap<String, String>();
     LinkedList<String> errors = new LinkedList<String>();
     public boolean on = false;
 
@@ -120,20 +119,12 @@ public class Server extends Client {
     }
 
     public boolean checkCode(SocketHandler s) {
-        //TODO: Check the code
-        print("check the code");
-        String token = (String) s.getKey("token");
-        String code = (String) s.getKey("Code");
-        return true;
+        return s.isSuccess();
     }
 
-    public String[] generateCode(SocketHandler s) throws IOException, ClassNotFoundException {
+    public String[] generateCode(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException {
         //Generate the code and the token
-        String token = genSecCode(13);
-        String code = genSecCode(13);
-        String[] oauth2 = {token, code};
-        //Save the information about the generated token
-        tokens.put(token, code);
+        String[] oauth2 = genKeyToken(maCle.pubKey());
 
         //Set the request body
         s.setOption(1);
@@ -142,8 +133,10 @@ public class Server extends Client {
         s.setNewBody();
 
         //Fill the body of the response
-        s.setKey("token", token);
-
+        s.setKey("token", oauth2[0]);
+        s.setKey("code", oauth2[1]);
+        //Display the secure message
+        serverDisplay.securityMessage(oauth2[2]);
         //Set Success
         s.setSuccess();
         //Set the reponse
@@ -190,7 +183,7 @@ public class Server extends Client {
 
     }
 
-    public void equipmentToSynchronizeWith(SocketHandler s) throws IOException,ClassNotFoundException {
+    public void equipmentToSynchronizeWith(SocketHandler s) throws IOException, ClassNotFoundException {
         s.setNewBody();
         int key = 1;
         for (Integer port : CA.keySet()) {

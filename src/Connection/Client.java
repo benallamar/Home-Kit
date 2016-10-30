@@ -88,7 +88,7 @@ public class Client extends IOOperation implements Runnable {
         {
             System.out.println("Error 11" + e.getMessage());
             errors.add(e.getLocalizedMessage());
-
+            e.getMessage()
         }
     }
 
@@ -162,21 +162,26 @@ public class Client extends IOOperation implements Runnable {
         //Set the header of the response
         s.setHeader();
         //Handle the response
-        serverDisplay.authenticate(s, this);
-        //Get the request from the client
-        read(s, true);
-        //Set the display
-        if (s.isSuccess()) {
-            acceptConnection(s);
-            establishConnection(s);
+        if (serverDisplay.authenticate(s, this)) {
+            //Get the request from the client
+            s.setSuccess();
+            write(s, true);
+            //Set that we accept the connection
             read(s, true);
-            startSynchronization(s);
-            //For display proposal
-            serverDisplay.accepted();
-            update();
-        } else {
-            serverDisplay.refused();
+            //Set the display
+            if (s.isSuccess()) {
+                acceptConnection(s);
+                establishConnection(s);
+                read(s, true);
+                startSynchronization(s);
+                //For display proposal
+                serverDisplay.accepted();
+                update();
+            } else {
+                serverDisplay.refused();
+            }
         }
+        serverDisplay.dispose();
         close(s);
     }
 
