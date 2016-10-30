@@ -13,6 +13,7 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -40,7 +41,8 @@ public class Server extends Client {
     }
 
     public void runServer() {
-        print("server is on");
+        print("server on port : " + port + " is runing");
+        switchMode();
         while (true) {
             try {
 
@@ -115,7 +117,14 @@ public class Server extends Client {
     }
 
 
-    public boolean isConnected(SocketHandler s) {
+    public boolean isConnected(SocketHandler s) throws IOException, OperatorCreationException, CertException {
+        for (Object[] obj : CA.values()) {
+            if (s.getCertificat().verifiCerif((PublicKey) obj[0])) {
+                print("connected");
+                return true;
+            }
+            print("no connected");
+        }
         return false;
     }
 
@@ -152,15 +161,15 @@ public class Server extends Client {
     }
 
 
-    public void connectedEquipement(SocketHandler s, IHMConnexion serverDisplay) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ClassNotFoundException, OperatorCreationException, CertException {
+    public void connectedEquipement(SocketHandler s) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ClassNotFoundException, OperatorCreationException, CertException {
+        s.debug();
         switch (s.getOption()) {
-            case 4:
+            case 3:
                 //Wait for the connection
-                serverDisplay.waitForConnection();
-                connect(s);
+                establishConnection(s);
+                //s.debug();
                 read(s, true);
                 acceptConnection(s);
-                serverDisplay.accepted();
                 break;
             default:
                 print("No known value");
@@ -177,11 +186,15 @@ public class Server extends Client {
             read(s, true);
             if (checkCode(s)) {
                 serverDisplay.waitForConnection();
-                connect(s);
+                establishConnection(s);
                 read(s, true);
                 acceptConnection(s);
                 serverDisplay.accepted();
                 equipmentToSynchronizeWith(s);//We send the equipement to synchronize with
+                read(s, true);
+                print("Start syn server");
+                s.debug();
+                startSynchronization(s);
             } else {
                 unauthorized(s);
                 serverDisplay.refused();
@@ -190,15 +203,6 @@ public class Server extends Client {
 
     }
 
-    public void equipmentToSynchronizeWith(SocketHandler s) throws IOException,ClassNotFoundException {
-        s.setNewBody();
-        int key = 1;
-        for (Integer port : CA.keySet()) {
-            s.setKey("key_" + key, port);
-            key++;
-        }
-        write(s, true);
-    }
 
     public static void main(String[] args) {
         Server server = new Server("host", 3000);
@@ -212,7 +216,6 @@ public class Server extends Client {
 
     public void run() {
         if (mode_server) {
-            runServer();
         } else {
             runClient();
         }

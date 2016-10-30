@@ -1,6 +1,7 @@
 package Connection;
 
 
+import HomeSecurityLayer.Certificat;
 import HomeSecurityLayer.PaireClesRSA;
 import Interfaces.IHMConnexion;
 import org.bouncycastle.cert.CertException;
@@ -17,6 +18,7 @@ import java.security.spec.InvalidKeySpecException;
 public class Client extends IOOperation implements Runnable {
     private int serverPort = 0;
     private int option = 0;
+    private int parentPort = 0;
 
     public Client(String hostName, int port) {
         maCle = new PaireClesRSA(1024);
@@ -28,19 +30,21 @@ public class Client extends IOOperation implements Runnable {
         //Display the message of waiting connection
         try {
             //Initiate the socket
-            SocketHandler s = new SocketHandler("localhost", port, name);
+            SocketHandler s = new SocketHandler("localhost", port, serverPort, name);
             IHMConnexion serverDisplay = new IHMConnexion("Client" + getName(), "" + serverPort);
             switch (option) {
                 case 1:
                     connect(s, serverDisplay);
                     break;
                 case 2:
+                    print("Synchro");
                     synchronize(s);
                     break;
                 default:
                     print("Unkonw option");
                     close(s);
             }
+            update();
         } catch (IOException e)
 
         {
@@ -94,8 +98,6 @@ public class Client extends IOOperation implements Runnable {
 
     //Create the session
     public void ack(SocketHandler s) throws IOException, ClassNotFoundException {
-        //We have to make an acknowledge to the server
-        s.setOption(0);
         //Instantiate the body of the response
         s.setNewBody();
         //Set the response
@@ -127,16 +129,6 @@ public class Client extends IOOperation implements Runnable {
         client.start();
     }
 
-    public void startSynchronization(SocketHandler s) throws IOException {
-        //We have to send the key to all the
-        int k = 0;
-        while (s.hasKey("key_" + k)) {
-            setServerPort((Integer) s.getKey("key_" + k));
-            setOption(2);
-            setClientMode();
-            new Thread(this).start();
-        }
-    }
 
     public void setClientMode() {
         mode_server = false;
@@ -154,6 +146,8 @@ public class Client extends IOOperation implements Runnable {
         //Check
         serverDisplay.waitForConnection();
         //We have to check if is not connected.
+        s.setOption(3);
+        //Start the connection
         ack(s);
         //Get the response from the server
         read(s, true);
@@ -171,19 +165,51 @@ public class Client extends IOOperation implements Runnable {
             establishConnection(s);
             read(s, true);
             startSynchronization(s);
-            //For display proposal
-            serverDisplay.accepted();
+            equipmentToSynchronizeWith(s);
             update();
+            serverDisplay.dispose();
         } else {
             serverDisplay.refused();
         }
         close(s);
     }
 
-    public void synchronize(SocketHandler s) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, OperatorException, CertException, InterruptedException {
 
+    public void equipmentToSynchronizeWith(SocketHandler s) throws IOException, ClassNotFoundException {
+        s.setNewBody();
+        int key = 1;
+        for (int portEqui : CA.keySet()) {
+            if (portEqui != s.getFromPort()) {
+                print("Synchroniztion of the equipement " + s.getFromPort() + " to the one connected on the port: " + portEqui);
+                s.setKey("key_" + key, portEqui);
+                key++;
+            }
+        }
+        print("line" + getPort());
+        s.debug();
+        write(s, true);
+    }
+
+    public void startSynchronization(SocketHandler s) throws IOException {
+        //We have to send the key to all the
+        int k = 1;
+        while (s.hasKey("key_" + k)) {
+            Double desPort = (Double) s.getKey("key_" + k);
+            print("Synchronize the equipement:" + port + " with the equipement:" + desPort.intValue());
+            setServerPort(desPort.intValue());
+            setOption(2);
+            setParentPort(s.getFromPort());
+            new Thread(this).start();
+            k++;
+        }
+    }
+
+    public void synchronize(SocketHandler s) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, OperatorException, CertException, InterruptedException {
+        s.setOption(3);
         //Set the public Key to decipher the code
         s.setPublicKey(maCle);
+        //We send the certificat too
+        s.setCertificat((Certificat) CA.get(parentPort)[1]);
         //We have to check if is not connected.
         ack(s);
         //Get the response from the server
@@ -194,16 +220,22 @@ public class Client extends IOOperation implements Runnable {
         s.setHeader();
         //Get the request from the client
         read(s, true);
+        print(s.getCertificat().toString());
         //Set the display
         if (s.isSuccess()) {
             acceptConnection(s);
             establishConnection(s);
-            update();
         }
         close(s);
+        print(CA.toString());
+        update();
     }
 
     public void setOption(int i) {
         option = i;
+    }
+
+    public void setParentPort(int port) {
+        parentPort = port;
     }
 }

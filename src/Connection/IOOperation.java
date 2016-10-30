@@ -11,6 +11,7 @@ import java.util.HashMap;
 import Console.JSONParser;
 import HomeSecurityLayer.Certificat;
 import HomeSecurityLayer.PaireClesRSA;
+import Interfaces.IHMHome.IHMHome;
 import org.bouncycastle.cert.CertException;
 import org.bouncycastle.operator.OperatorCreationException;
 
@@ -84,41 +85,40 @@ public abstract class IOOperation extends Thread {
 
     public void acceptConnection(SocketHandler s) throws OperatorCreationException, IOException, ClassNotFoundException, CertException {
         //we set the option to get the write from the server
-        s.response.setOption(1);
+        s.setOption(1);
 
         //Set the response body
-        s.response.setNewBody();
+        s.setNewBody();
 
         //Set the body of the connections
 
         //We update the CA file.
         PublicKey pubKey = getSession(s);
-        Certificat cert = s.request.getCertificat();
+        Certificat cert = s.getCertificat();
+        //System.out.print(cert);
         Object[] trusted_certificat = {pubKey, cert};
-        System.out.print(s.request.cert);
         if (cert.verifiCerif(pubKey)) {
-            CA.put(s.response.getFromPort(), trusted_certificat);
-            s.response.setSuccess();
+            //print("Get certificat from " + s.getFromPort() + " Certificat:" + cert.x509.toString());
+            CA.put(s.getFromPort(), trusted_certificat);
+            s.setSuccess();
         } else {
-            s.response.setFailed();
+            s.setFailed();
         }
     }
 
     //Create the certificat for the user.
     public void establishConnection(SocketHandler s) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, ClassNotFoundException {
         //Set the header of the destination
-        s.response.setHeader(s.request);
-        //Set to the next option of the operation
-        s.response.setOption(1);
+        s.setHeader();
         //Instantiate the body of the response
-        s.response.setNewBody();
-
+        s.setNewBody();
         //We generate the certificate after accepting the connection
         PublicKey pubKey = getSession(s);
-        s.response.setCertificat(new Certificat(name, pubKey, maCle.privKey(), 356));
-        print(s.response.getCertificat().toString());
+        Certificat cert = new Certificat(name, pubKey, maCle.privKey(), 356);
+        s.setCertificat(cert);
+        //print(cert.toString());
         //Set the status for the response
-        s.response.setSuccess();
+        s.setSuccess();
 
         //Set the response
         write(s, false);
@@ -134,6 +134,7 @@ public abstract class IOOperation extends Thread {
     }
 
     public void update() {
+        IHMHome.update();
     }
 
     public int getPort() {

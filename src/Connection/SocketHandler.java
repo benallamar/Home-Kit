@@ -1,5 +1,6 @@
 package Connection;
 
+import HomeSecurityLayer.Certificat;
 import HomeSecurityLayer.PaireClesRSA;
 
 import java.io.*;
@@ -23,18 +24,18 @@ public class SocketHandler {
     protected SocketBody request;
 
     public SocketHandler(Socket s, String name) {
-
         this.s = s;
         response = new SocketBody(name);
     }
 
-    public SocketHandler(String host, int port, String name) throws IOException {
-        this.s = new Socket(host, port);
+    public SocketHandler(String host, int port, int serverPort, String name) throws IOException {
+        this.s = new Socket(host, serverPort);
         response = new SocketBody(name);
+        setPorts(port, serverPort);
     }
 
     public void write(PaireClesRSA key, boolean encrypt) throws IOException, ClassNotFoundException {
-        response.debug();
+        //response.debug();
         os = s.getOutputStream();
         oos = new ObjectOutputStream(os);
         //We have to cypher the message before we send it.
@@ -54,6 +55,8 @@ public class SocketHandler {
         //TODO : Add the PGP protocol here
         String decryptedMessage = (String) ois.readObject();
         request = JSONParser.deserialize(decryptedMessage);
+        //
+        request.debug();
     }
 
     public void close() throws IOException {
@@ -65,7 +68,6 @@ public class SocketHandler {
     }
 
     public void setPublicKey(PaireClesRSA key) throws IOException {
-        System.out.print(key.toString());
         response.setPublicKey(key);
     }
 
@@ -118,10 +120,27 @@ public class SocketHandler {
     }
 
     public Object getKey(String key) {
-        return response.getKey(key);
+        return request.getKey(key);
     }
 
     public boolean hasKey(String key) {
-        return response.hasKkey(key);
+        return request.hasKkey(key);
+    }
+
+    public void setCertificat(Certificat certificat) throws IOException {
+        response.setCertificat(certificat);
+    }
+
+    public void setPorts(int portSource, int portDestination) {
+        response.setFromPort(portSource);
+        response.setToPort(portDestination);
+    }
+
+    public Certificat getCertificat() throws IOException {
+        return request.getCertificat();
+    }
+
+    public void debug() {
+        response.debug();
     }
 }

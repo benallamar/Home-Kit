@@ -2,10 +2,7 @@ package Component;
 
 import Connection.Server;
 import HomeSecurityLayer.Certificat;
-<<<<<<< HEAD
-=======
 import Interfaces.IHMEquipement;
->>>>>>> 7a6243510962f4572971285ac0623e07e60fb030
 
 import java.security.PublicKey;
 import java.util.HashMap;
@@ -31,7 +28,6 @@ public class Equipement extends Server {
 
     public void affichage() {
         String message = "Component: " + name;
-        System.out.println(message);
     }
 
     public String name() {
@@ -82,13 +78,9 @@ public class Equipement extends Server {
 
     }
 
-    public int getPort() {
-        return port;
-    }
 
-<<<<<<< HEAD
-=======
     public void update() {
+        super.update();
         display.repaint();
     }
 
@@ -100,5 +92,4 @@ public class Equipement extends Server {
         display = new IHMEquipement();
         display.setVisible(true);
     }
->>>>>>> 7a6243510962f4572971285ac0623e07e60fb030
 }

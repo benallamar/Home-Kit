@@ -176,7 +176,6 @@ public class IHMConnexion extends JFrame {
     }
 
     public void accepted() {
-        System.out.print(this.getContentPane().getComponent(1).toString());
         displayMessage("Connection Accepted");
 
     }
