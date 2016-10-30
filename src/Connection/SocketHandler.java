@@ -121,4 +121,7 @@ public class SocketHandler {
         return response.getKey(key);
     }
 
+    public boolean hasKey(String key) {
+        return response.hasKkey(key);
+    }
 }

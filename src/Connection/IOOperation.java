@@ -29,6 +29,7 @@ public abstract class IOOperation extends Thread {
     protected HashMap<Integer, PublicKey> sessions = new HashMap<Integer, PublicKey>();
     protected int port;
     protected LinkedList<String> errors = new LinkedList<String>();
+    boolean mode_server = true;
 
     // @over
     public void write(SocketHandler s, boolean encrypt) throws IOException, ClassNotFoundException {
@@ -56,22 +57,12 @@ public abstract class IOOperation extends Thread {
 
     }
 
-<<<<<<<HEAD
-
-    public void openSession(SocketBody request) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    public void openSession(SocketHandler s) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         //Deserialize the key
-        PublicKey pub_client = request.getPubKey();
+        PublicKey pub_client = s.request.getPubKey();
         //Open the session by adding the information to the sessions base
-        sessions.put(request.getFromPort(), pub_client);
-=======
-        public void openSession (SocketHandler s) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException
-        {
-            //Deserialize the key
-            PublicKey pub_client = s.request.getPubKey();
-            //Open the session by adding the information to the sessions base
-            sessions.put(s.getFromPort(), pub_client);
->>>>>>>7 a6243510962f4572971285ac0623e07e60fb030
-        }
+        sessions.put(s.getFromPort(), pub_client);
+    }
 
     public void closeSession(SocketBody request) {
         //Remove the key of the sessions
@@ -113,7 +104,8 @@ public abstract class IOOperation extends Thread {
         }
     }
 
-    public void connect(SocketHandler s) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, ClassNotFoundException {
+    //Create the certificat for the user.
+    public void establishConnection(SocketHandler s) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, ClassNotFoundException {
         //Set the header of the destination
         s.response.setHeader(s.request);
         //Set to the next option of the operation
@@ -147,4 +139,9 @@ public abstract class IOOperation extends Thread {
     public int getPort() {
         return port;
     }
+
+    public void switchMode() {
+        mode_server = !mode_server;
+    }
+
 }

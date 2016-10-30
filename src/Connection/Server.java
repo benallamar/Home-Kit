@@ -28,7 +28,6 @@ public class Server extends Client {
     HashMap<String, String> tokens = new HashMap<String, String>();
     LinkedList<String> errors = new LinkedList<String>();
     public boolean on = false;
-    boolean mode_server = true;
 
     public Server(String name, int port) {
         super(name, port);
@@ -60,11 +59,13 @@ public class Server extends Client {
                 if (isConnected(s)) {
                     //If is connected by comparing the given certificat we cold connect it again
                     serverDisplay.dispose();
-                    handleConnectedEquipement(s);
+                    //We handle the
+                    connectedEquipement(s);
 
                 } else {
                     //We have to try to connect it to the server or cancel the connection
-                    handleNotConnectEquipement(s, serverDisplay);
+                    notConnectedEquipement(s, serverDisplay);
+                    //We Update the home image
                     update();
                 }
 
@@ -118,26 +119,6 @@ public class Server extends Client {
         return false;
     }
 
-
-    public void refuseConnection(SocketHandler s) throws IOException, ClassNotFoundException {
-
-        //Set the option
-        s.setOption(2);
-        //Instantiate the response body
-        s.setFailed();
-        //Set the response
-        write(s, false);
-    }
-
-    public void getCA(SocketBody s) {
-        //TODO: To send the list of the DA list
-        //s.response.setOption(3);
-        //for (Object[] cert_aut : CA.values()) {
-        //    s.response.setKey("cert", cert_aut[1]);
-        //}
-        //response.setSuccess();
-    }
-
     public boolean checkCode(SocketHandler s) {
         //TODO: Check the code
         print("check the code");
@@ -171,10 +152,15 @@ public class Server extends Client {
     }
 
 
-    public void handleConnectedEquipement(SocketHandler s) throws IOException {
+    public void connectedEquipement(SocketHandler s, IHMConnexion serverDisplay) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ClassNotFoundException, OperatorCreationException, CertException {
         switch (s.getOption()) {
             case 4:
-
+                //Wait for the connection
+                serverDisplay.waitForConnection();
+                connect(s);
+                read(s, true);
+                acceptConnection(s);
+                serverDisplay.accepted();
                 break;
             default:
                 print("No known value");
@@ -183,7 +169,7 @@ public class Server extends Client {
     }
 
 
-    public void handleNotConnectEquipement(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException, CertException, OperatorCreationException, InvalidKeySpecException, NoSuchAlgorithmException {
+    public void notConnectedEquipement(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException, CertException, OperatorCreationException, InvalidKeySpecException, NoSuchAlgorithmException {
 
         if (serverDisplay.doYouAccept(s.getSourceName())) {
             String[] oauth2 = generateCode(s);
@@ -195,6 +181,7 @@ public class Server extends Client {
                 read(s, true);
                 acceptConnection(s);
                 serverDisplay.accepted();
+                equipmentToSynchronizeWith(s);//We send the equipement to synchronize with
             } else {
                 unauthorized(s);
                 serverDisplay.refused();
@@ -203,44 +190,21 @@ public class Server extends Client {
 
     }
 
+    public void equipmentToSynchronizeWith(SocketHandler s) throws IOException,ClassNotFoundException {
+        s.setNewBody();
+        int key = 1;
+        for (Integer port : CA.keySet()) {
+            s.setKey("key_" + key, port);
+            key++;
+        }
+        write(s, true);
+    }
+
     public static void main(String[] args) {
         Server server = new Server("host", 3000);
         server.run();
     }
 
-    //Check if the neighberhood
-    public boolean doYouKnow(SocketHandler s) throws OperatorCreationException, CertException, IOException, InvalidKeySpecException, NoSuchAlgorithmException {
-        if (CA.containsKey(s.getFromPort())) {
-            PublicKey key = s.getPubKey();
-            Certificat cert = (Certificat) CA.get(s.getFromPort())[1];
-            if (cert.verifiCerif(key))
-                return true;
-        }
-        return false;
-    }
-
-    public void doYouTrust(SocketHandler s) throws OperatorCreationException, CertException, IOException, InvalidKeySpecException, NoSuchAlgorithmException {
-        if (isExpired(s)) {
-
-        } else {
-            if (doYouKnow(s)) {
-                //We should return true
-            } else {
-                Set<Integer> ports = CA.keySet();
-                for (int port : ports) {
-                    if (doYouTrustClientMode(port, s)) {
-
-                    }
-
-                }
-            }
-        }
-
-    }
-
-    public boolean doYouTrustClientMode(int port, SocketHandler s) {
-        return true;
-    }
 
     public boolean isOn() {
         return on;
@@ -254,7 +218,4 @@ public class Server extends Client {
         }
     }
 
-    public void switchMode() {
-        mode_server = !mode_server;
-    }
 }

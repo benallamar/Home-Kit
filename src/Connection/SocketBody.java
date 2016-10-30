@@ -126,4 +126,8 @@ public final class SocketBody {
     public Certificat getCertificat() throws IOException {
         return Certificat.deserialize(cert);
     }
+
+    public boolean hasKkey(String key) {
+        return body.containsKey(key);
+    }
 }
