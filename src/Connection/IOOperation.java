@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.HashMap;
 
 import Console.JSONParser;
@@ -13,7 +14,9 @@ import HomeSecurityLayer.Certificat;
 import HomeSecurityLayer.PaireClesRSA;
 import Interfaces.IHMHome.IHMHome;
 import org.bouncycastle.cert.CertException;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.operator.OperatorCreationException;
+import sun.security.rsa.RSAPublicKeyImpl;
 
 import java.util.LinkedList;
 import java.util.UUID;
@@ -145,4 +148,33 @@ public abstract class IOOperation extends Thread {
         mode_server = !mode_server;
     }
 
+    //To avoid the man in the middle
+    public static String[] genKeyToken(PublicKey key) {
+        RSAPublicKeyImpl pubParams = (RSAPublicKeyImpl) key;
+        String modulus = pubParams.getModulus().toString();
+        int longueur = modulus.length();
+        String token = "", message = "", code = "";
+        for (int i = 0; i < 12; i++) {
+            int position = ((Double) (Math.random() * longueur)).intValue();
+            token += Integer.toHexString(position);
+            code += Integer.toHexString(position).length();
+            message += modulus.charAt(position);
+        }
+        return new String[]{token, code, message};
+    }
+
+    //Decode the message
+    public static String genKeyMessage(PublicKey key, String token, String code) {
+        RSAPublicKeyImpl pubParams = (RSAPublicKeyImpl) key;
+        String modulus = pubParams.getModulus().toString();
+        String message = "";
+        int k = 0;
+        for (int i = 0; i < code.length(); i++) {
+            int length = Integer.parseInt("" + code.charAt(i));
+            int pos = Integer.parseInt(token.substring(k, k + length), 16);
+            message += modulus.charAt(pos);
+            k += length;
+        }
+        return message;
+    }
 }

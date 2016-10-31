@@ -143,4 +143,12 @@ public class SocketHandler {
     public void debug() {
         response.debug();
     }
+
+    public boolean hasPubKey() {
+        return request.hasPubKey();
+    }
+
+    public boolean hasCertificat() {
+        return request.hasCertificat();
+    }
 }

@@ -2,6 +2,7 @@ package Interfaces;
 
 import Component.Equipement;
 import Connection.Client;
+import Connection.IOOperation;
 import Connection.SocketHandler;
 
 import javax.swing.*;
@@ -10,6 +11,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.concurrent.TimeUnit;
 
 public class IHMConnexion extends JFrame {
@@ -19,121 +23,28 @@ public class IHMConnexion extends JFrame {
     /**
      * Create the panel.
      */
-    public IHMConnexion(String host, String client) {
+    public IHMConnexion(String host, String client, boolean isServer) {
         this.host = host;
         this.client = client;
-        setBounds(50, 50, 200, 200);
+        setBounds(150 + (isServer ? 430 : 0), 200, 200, 200);
         setContentPane(panelContent);
         setTitle(host);
         setSize(new Dimension(400, 200));
-        setLocationRelativeTo(null);
         setResizable(false);
         setVisible(true);
 
     }
 
-    public void authenticate(SocketHandler s, Client client) throws InterruptedException, IOException {
-        panelContent.removeAll();
-        JLabel login = new JLabel("Login");
-        JTextField login1 = new JTextField();
-        JLabel mdp = new JLabel("Mot de Passe");
-        JPasswordField mdp1 = new JPasswordField();
-        JButton valider = new JButton("Valider ");
-        JButton annuler = new JButton(" Annuler");
-        String[] auth = {"", ""};
-        IHMConnexion localFrame = this;
-        valider.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-
-
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                try {
-                    auth[0] = String.valueOf(login1.getText());
-                    auth[1] = String.valueOf(mdp1.getPassword());
-                    client.sendCode(s, auth);
-                } catch (ClassNotFoundException error) {
-
-                } catch (IOException error) {
-
-                }
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-
-            }
-        });
-        annuler.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                try {
-                    localFrame.dispose();
-                    client.close(s);
-                } catch (IOException error) {
-
-                }
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-
-            }
-        });
-        panelContent.setLayout(null);
-
-        panelContent.add(login);
-        login.setBounds(20, 20, 100, 20);
-
-        panelContent.add(login1);
-        login1.setBounds(150, 20, 150, 20);
-
-        panelContent.add(mdp);
-        mdp.setBounds(22, 55, 100, 20);
-
-        panelContent.add(mdp1);
-        mdp1.setBounds(150, 55, 150, 20);
-
-        panelContent.add(valider);
-        valider.setBounds(125, 100, 77, 20);
-
-        panelContent.add(annuler);
-        annuler.setBounds(225, 100, 82, 20);
-        revalidate();
-        repaint();
+    public boolean authenticate(SocketHandler s, Client client) throws InterruptedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        String message = IOOperation.genKeyMessage(s.getPubKey(), (String) s.getKey("token"), (String) s.getKey("code"));
+        int dialogButton = JOptionPane.YES_NO_OPTION;
+        int dialogResult = JOptionPane.showConfirmDialog(this, "Do you see this: \n " + message + "\n on your system panel ?", " Avoid Man In The Middle Attack", dialogButton);
+        return dialogResult == 0;
     }
 
     public boolean doYouAccept(String equiName) {
         int dialogButton = JOptionPane.YES_NO_OPTION;
-        int dialogResult = JOptionPane.showConfirmDialog(null, "The device" + equiName + " is not connected \n do you want to accept the connection with it ?", "Title on Box", dialogButton);
+        int dialogResult = JOptionPane.showConfirmDialog(this, "The device : " + equiName.toUpperCase() + " is not connected \n Do you want to accept the connection ?", "Connection Request", dialogButton);
         return dialogResult == 0;
     }
 
@@ -187,6 +98,20 @@ public class IHMConnexion extends JFrame {
     public void codeAccepted() {
         displayMessage("Code Accepted");
 
+    }
+
+    public void securityMessage(String message) {
+        panelContent.removeAll();
+        JLabel codeLabel = new JLabel("Please make sure you see the code below on your equipement");
+        codeLabel.setBounds(351, 266, 89, 23);
+        panelContent.add(codeLabel);
+        JLabel tokenLabel = new JLabel(message);
+        tokenLabel.setBounds(351, 300, 89, 23);
+        panelContent.add(tokenLabel);
+        panelContent.revalidate();
+        panelContent.repaint();
+        revalidate();
+        repaint();
     }
 
 }

@@ -31,7 +31,8 @@ public class Client extends IOOperation implements Runnable {
         try {
             //Initiate the socket
             SocketHandler s = new SocketHandler("localhost", port, serverPort, name);
-            IHMConnexion serverDisplay = new IHMConnexion("Client" + getName(), "" + serverPort);
+            print("test");
+            IHMConnexion serverDisplay = new IHMConnexion("Client : " + name, "" + serverPort, false);
             switch (option) {
                 case 1:
                     connect(s, serverDisplay);
@@ -92,7 +93,6 @@ public class Client extends IOOperation implements Runnable {
         {
             System.out.println("Error 11" + e.getMessage());
             errors.add(e.getLocalizedMessage());
-
         }
     }
 
@@ -126,7 +126,8 @@ public class Client extends IOOperation implements Runnable {
     public static void main(String[] args) {
         Client client = new Client("localhost", 3000);
         client.setServerPort(3000);
-        client.start();
+        client.setOption(1);
+        client.runClient();
     }
 
 
@@ -155,21 +156,26 @@ public class Client extends IOOperation implements Runnable {
         //Set the header of the response
         s.setHeader();
         //Handle the response
-        serverDisplay.authenticate(s, this);
-        //Get the request from the client
-        read(s, true);
-        //Set the display
-        if (s.isSuccess()) {
-            acceptConnection(s);
-            establishConnection(s);
+        if (serverDisplay.authenticate(s, this)) {
+            //Get the request from the client
+            s.setSuccess();
+            write(s, true);
+            //Set that we accept the connection
             read(s, true);
-            startSynchronization(s);
-            equipmentToSynchronizeWith(s);
-            update();
-            serverDisplay.dispose();
-        } else {
-            serverDisplay.refused();
+            //Set the display
+            if (s.isSuccess()) {
+                acceptConnection(s);
+                establishConnection(s);
+                read(s, true);
+                startSynchronization(s);
+                //For display proposal
+                serverDisplay.dispose();
+                update();
+            } else {
+                serverDisplay.refused();
+            }
         }
+        serverDisplay.dispose();
         close(s);
     }
 
@@ -237,4 +243,5 @@ public class Client extends IOOperation implements Runnable {
     public void setParentPort(int port) {
         parentPort = port;
     }
+
 }

@@ -1,7 +1,5 @@
 package Connection;
 
-import HomeSecurityLayer.Certificat;
-import HomeSecurityLayer.PaireClesRSA;
 import Interfaces.IHMConnexion;
 import org.bouncycastle.cert.CertException;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -11,10 +9,7 @@ import java.net.ServerSocket;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * Created by marouanebenalla on 07/10/2016.
@@ -26,7 +21,6 @@ For server there are four main option:
     3- Do you trust the equipement with the given id.
  */
 public class Server extends Client {
-    HashMap<String, String> tokens = new HashMap<String, String>();
     LinkedList<String> errors = new LinkedList<String>();
     public boolean on = false;
 
@@ -55,7 +49,7 @@ public class Server extends Client {
                 //Set the public Key to decipher the code
                 s.setPublicKey(maCle);
                 //We switch from one user to another.
-                IHMConnexion serverDisplay = new IHMConnexion("Server" + getName(), s.getSourceName());
+                IHMConnexion serverDisplay = new IHMConnexion("Server : " + name, s.getSourceName(), true);
                 //Check of is a trusted equipement
                 serverDisplay.checkTrustedEquipement();
                 if (isConnected(s)) {
@@ -117,32 +111,32 @@ public class Server extends Client {
     }
 
 
-    public boolean isConnected(SocketHandler s) throws IOException, OperatorCreationException, CertException {
-        for (Object[] obj : CA.values()) {
-            if (s.getCertificat().verifiCerif((PublicKey) obj[0])) {
-                print("connected");
-                return true;
+    public boolean isConnected(SocketHandler s) throws IOException, OperatorCreationException, CertException, NoSuchAlgorithmException, InvalidKeySpecException {
+        if (s.hasCertificat()) {
+            for (Object[] obj : CA.values()) {
+                if (s.getCertificat().verifiCerif((PublicKey) obj[0])) {
+                    return true;
+                }
             }
-            print("no connected");
+        }
+        if (s.hasPubKey()) {
+            for (Object[] obj : CA.values()) {
+                if (s.getPubKey().equals(obj[0])) {
+                    print("connected");
+                    return true;
+                }
+            }
         }
         return false;
     }
 
     public boolean checkCode(SocketHandler s) {
-        //TODO: Check the code
-        print("check the code");
-        String token = (String) s.getKey("token");
-        String code = (String) s.getKey("Code");
-        return true;
+        return s.isSuccess();
     }
 
-    public String[] generateCode(SocketHandler s) throws IOException, ClassNotFoundException {
+    public String[] generateCode(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException {
         //Generate the code and the token
-        String token = genSecCode(13);
-        String code = genSecCode(13);
-        String[] oauth2 = {token, code};
-        //Save the information about the generated token
-        tokens.put(token, code);
+        String[] oauth2 = genKeyToken(maCle.pubKey());
 
         //Set the request body
         s.setOption(1);
@@ -151,8 +145,10 @@ public class Server extends Client {
         s.setNewBody();
 
         //Fill the body of the response
-        s.setKey("token", token);
-
+        s.setKey("token", oauth2[0]);
+        s.setKey("code", oauth2[1]);
+        //Display the secure message
+        serverDisplay.securityMessage(oauth2[2]);
         //Set Success
         s.setSuccess();
         //Set the reponse
@@ -181,28 +177,35 @@ public class Server extends Client {
     public void notConnectedEquipement(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException, CertException, OperatorCreationException, InvalidKeySpecException, NoSuchAlgorithmException {
 
         if (serverDisplay.doYouAccept(s.getSourceName())) {
-            String[] oauth2 = generateCode(s);
-            serverDisplay.codeDisplay(oauth2[0], oauth2[1]);
+            generateCode(s, serverDisplay);
             read(s, true);
             if (checkCode(s)) {
                 serverDisplay.waitForConnection();
                 establishConnection(s);
                 read(s, true);
                 acceptConnection(s);
-                serverDisplay.accepted();
+                serverDisplay.dispose();
                 equipmentToSynchronizeWith(s);//We send the equipement to synchronize with
                 read(s, true);
-                print("Start syn server");
-                s.debug();
                 startSynchronization(s);
             } else {
                 unauthorized(s);
+                write(s, false);
                 serverDisplay.refused();
             }
         }
 
     }
 
+    public void equipmentToSynchronizeWith(SocketHandler s) throws IOException, ClassNotFoundException {
+        s.setNewBody();
+        int key = 1;
+        for (Integer port : CA.keySet()) {
+            s.setKey("key_" + key, port);
+            key++;
+        }
+        write(s, true);
+    }
 
     public static void main(String[] args) {
         Server server = new Server("host", 3000);
@@ -216,6 +219,7 @@ public class Server extends Client {
 
     public void run() {
         if (mode_server) {
+            runServer();
         } else {
             runClient();
         }

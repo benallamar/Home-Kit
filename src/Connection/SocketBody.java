@@ -21,8 +21,8 @@ public final class SocketBody {
     private int from;
     private int to;
     private HashMap<String, Object> body = new HashMap<String, Object>();
-    private String public_key;
-    public String cert;
+    private String public_key = null;
+    public String cert = null;
 
     public SocketBody(String sourceName) {
         this.sourceName = sourceName;
@@ -129,5 +129,13 @@ public final class SocketBody {
 
     public boolean hasKkey(String key) {
         return body.containsKey(key);
+    }
+
+    public boolean hasCertificat() {
+        return cert != null;
+    }
+
+    public boolean hasPubKey() {
+        return public_key != null;
     }
 }
