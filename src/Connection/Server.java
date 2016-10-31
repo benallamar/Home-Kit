@@ -41,6 +41,7 @@ public class Server extends Client {
             try {
 
                 SocketHandler s = new SocketHandler(server.accept(), name);
+                //We get the information from the client
                 read(s, false);
                 //Open the sessions
                 openSession(s);
@@ -52,6 +53,7 @@ public class Server extends Client {
                 IHMConnexion serverDisplay = new IHMConnexion("Server : " + name, s.getSourceName(), true);
                 //Check of is a trusted equipement
                 serverDisplay.checkTrustedEquipement();
+                //WWe check if the equipement is trusted or not, we verify either the certificat or the public key
                 if (isConnected(s)) {
                     //If is connected by comparing the given certificat we cold connect it again
                     serverDisplay.dispose();
@@ -61,17 +63,18 @@ public class Server extends Client {
                 } else {
                     //We have to try to connect it to the server or cancel the connection
                     notConnectedEquipement(s, serverDisplay);
-                    //We Update the home image
-                    update();
-                }
 
+                }
+                //We Update the home image
+                update();
                 close(s);
 
 
             } catch (IOException e)
 
             {
-                System.out.println("Error 2" + e.getMessage());
+                System.out.println("Error 2");
+                e.printStackTrace();
                 errors.add(e.getLocalizedMessage());
 
             } catch (ClassNotFoundException e)
@@ -79,30 +82,40 @@ public class Server extends Client {
             {
                 System.out.println("Error 3" + e.getMessage());
                 errors.add(e.getLocalizedMessage());
+                e.printStackTrace();
+
 
             } catch (OperatorCreationException e)
 
             {
                 System.out.println("Error 3" + e.getMessage());
                 errors.add(e.getLocalizedMessage());
+                e.printStackTrace();
+
 
             } catch (CertException e)
 
             {
                 System.out.println("Error 3" + e.getMessage());
                 errors.add(e.getLocalizedMessage());
+                e.printStackTrace();
+
 
             } catch (InvalidKeySpecException e)
 
             {
                 System.out.println("Error 4" + e.getMessage());
                 errors.add(e.getLocalizedMessage());
+                e.printStackTrace();
+
 
             } catch (NoSuchAlgorithmException e)
 
             {
-                System.out.println("Error 5" + e.getMessage());
+                System.out.println("Error 5" + e.getCause().toString());
                 errors.add(e.getLocalizedMessage());
+                e.printStackTrace();
+
 
             }
         }
@@ -115,6 +128,7 @@ public class Server extends Client {
         if (s.hasCertificat()) {
             for (Object[] obj : CA.values()) {
                 if (s.getCertificat().verifiCerif((PublicKey) obj[0])) {
+                    print("Connected");
                     return true;
                 }
             }
@@ -127,6 +141,7 @@ public class Server extends Client {
                 }
             }
         }
+        print("No connected");
         return false;
     }
 
@@ -158,14 +173,13 @@ public class Server extends Client {
 
 
     public void connectedEquipement(SocketHandler s) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ClassNotFoundException, OperatorCreationException, CertException {
-        s.debug();
         switch (s.getOption()) {
             case 3:
                 //Wait for the connection
                 establishConnection(s);
-                //s.debug();
                 read(s, true);
                 acceptConnection(s);
+                print("Equipement " + port + " Connected Equipement" + CA.toString());
                 break;
             default:
                 print("No known value");
@@ -184,10 +198,10 @@ public class Server extends Client {
                 establishConnection(s);
                 read(s, true);
                 acceptConnection(s);
-                serverDisplay.dispose();
                 equipmentToSynchronizeWith(s);//We send the equipement to synchronize with
                 read(s, true);
                 startSynchronization(s);
+                serverDisplay.dispose();
             } else {
                 unauthorized(s);
                 write(s, false);
@@ -195,16 +209,6 @@ public class Server extends Client {
             }
         }
 
-    }
-
-    public void equipmentToSynchronizeWith(SocketHandler s) throws IOException, ClassNotFoundException {
-        s.setNewBody();
-        int key = 1;
-        for (Integer port : CA.keySet()) {
-            s.setKey("key_" + key, port);
-            key++;
-        }
-        write(s, true);
     }
 
     public static void main(String[] args) {

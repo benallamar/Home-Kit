@@ -11,6 +11,7 @@ import org.bouncycastle.operator.OperatorException;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.LinkedList;
 
 /**
  * Created by marouanebenalla on 07/10/2016.
@@ -19,6 +20,7 @@ public class Client extends IOOperation implements Runnable {
     private int serverPort = 0;
     private int option = 0;
     private int parentPort = 0;
+    private LinkedList<Integer> equiToSynWith = new LinkedList<Integer>();
 
     public Client(String hostName, int port) {
         maCle = new PaireClesRSA(1024);
@@ -30,19 +32,20 @@ public class Client extends IOOperation implements Runnable {
         //Display the message of waiting connection
         try {
             //Initiate the socket
-            SocketHandler s = new SocketHandler("localhost", port, serverPort, name);
-            print("test");
-            IHMConnexion serverDisplay = new IHMConnexion("Client : " + name, "" + serverPort, false);
+            SocketHandler s = null;
             switch (option) {
                 case 1:
+                    s = new SocketHandler("localhost", port, serverPort, name);
+                    IHMConnexion serverDisplay = new IHMConnexion("Client : " + name, "" + serverPort, false);
                     connect(s, serverDisplay);
+                    serverDisplay.dispose();
                     break;
                 case 2:
-                    print("Synchro");
+                    int srvPort = equiToSynWith.pop();
+                    s = new SocketHandler("localhost", port, srvPort, name);
                     synchronize(s);
                     break;
                 default:
-                    print("Unkonw option");
                     close(s);
             }
             update();
@@ -51,48 +54,58 @@ public class Client extends IOOperation implements Runnable {
         {
             System.out.println("Error 5" + e.getLocalizedMessage());
             errors.add(e.getLocalizedMessage());
+            e.printStackTrace();
+
 
         } catch (ClassNotFoundException e)
 
         {
             System.out.println("Error 6" + e.getMessage());
             errors.add(e.getLocalizedMessage());
+            e.printStackTrace();
+
 
         } catch (OperatorCreationException e)
 
         {
             System.out.println("Error 7" + e.getMessage());
             errors.add(e.getLocalizedMessage());
+            e.printStackTrace();
 
         } catch (CertException e)
 
         {
             System.out.println("Error 8" + e.getMessage());
             errors.add(e.getLocalizedMessage());
+            e.printStackTrace();
 
         } catch (InvalidKeySpecException e)
 
         {
             System.out.println("Error 9" + e.getMessage());
             errors.add(e.getLocalizedMessage());
+            e.printStackTrace();
 
         } catch (NoSuchAlgorithmException e)
 
         {
             System.out.println("Error 10" + e.getMessage());
             errors.add(e.getLocalizedMessage());
+            e.printStackTrace();
 
         } catch (InterruptedException e)
 
         {
             System.out.println("Error 11" + e.getMessage());
             errors.add(e.getLocalizedMessage());
+            e.printStackTrace();
 
         } catch (OperatorException e)
 
         {
             System.out.println("Error 11" + e.getMessage());
             errors.add(e.getLocalizedMessage());
+            e.printStackTrace();
         }
     }
 
@@ -159,15 +172,18 @@ public class Client extends IOOperation implements Runnable {
         if (serverDisplay.authenticate(s, this)) {
             //Get the request from the client
             s.setSuccess();
+            //We sen the information to the server
             write(s, true);
             //Set that we accept the connection
             read(s, true);
             //Set the display
             if (s.isSuccess()) {
                 acceptConnection(s);
-                establishConnection(s);
+                establishConnection(s);//What do we have after that one ?
                 read(s, true);
+                print("Start synchron for the client");
                 startSynchronization(s);
+                equipmentToSynchronizeWith(s);
                 //For display proposal
                 serverDisplay.dispose();
                 update();
@@ -190,8 +206,6 @@ public class Client extends IOOperation implements Runnable {
                 key++;
             }
         }
-        print("line" + getPort());
-        s.debug();
         write(s, true);
     }
 
@@ -201,20 +215,29 @@ public class Client extends IOOperation implements Runnable {
         while (s.hasKey("key_" + k)) {
             Double desPort = (Double) s.getKey("key_" + k);
             print("Synchronize the equipement:" + port + " with the equipement:" + desPort.intValue());
-            setServerPort(desPort.intValue());
             setOption(2);
             setParentPort(s.getFromPort());
+            print("Set the parent port");
+            equiToSynWith.push(desPort.intValue());
+            print("Set the ports");
             new Thread(this).start();
             k++;
         }
     }
 
     public void synchronize(SocketHandler s) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, OperatorException, CertException, InterruptedException {
+        //We show a message
+        print("Start the synchronisation of the equipement " + port + " with the equipement " + serverPort);
+        //We set the option of the message
         s.setOption(3);
         //Set the public Key to decipher the code
         s.setPublicKey(maCle);
         //We send the certificat too
+        print("test");
         s.setCertificat((Certificat) CA.get(parentPort)[1]);
+        //print
+        print("test");
+        s.debug();
         //We have to check if is not connected.
         ack(s);
         //Get the response from the server
@@ -223,9 +246,6 @@ public class Client extends IOOperation implements Runnable {
         openSession(s);
         //Set the header of the response
         s.setHeader();
-        //Get the request from the client
-        read(s, true);
-        print(s.getCertificat().toString());
         //Set the display
         if (s.isSuccess()) {
             acceptConnection(s);
@@ -233,7 +253,6 @@ public class Client extends IOOperation implements Runnable {
         }
         close(s);
         print(CA.toString());
-        update();
     }
 
     public void setOption(int i) {

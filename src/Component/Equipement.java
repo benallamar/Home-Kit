@@ -2,23 +2,21 @@ package Component;
 
 import Connection.Server;
 import HomeSecurityLayer.Certificat;
-import Interfaces.IHMEquipement;
 
 import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Objects;
 
 /**
  * Project Name : TL_crypto
  */
 public class Equipement extends Server {
-    private IHMEquipement display;
+    //private IHMEquipement display;
 
     public Equipement(String name, int port) {
         // Define the component
         super(name, port);
-        display = new IHMEquipement();
+        //display = new IHMEquipement();
     }
 
     public boolean isEqual(String name) {
@@ -26,8 +24,15 @@ public class Equipement extends Server {
     }
 
 
-    public void affichage() {
+    public String affichage() {
+
         String message = "Component: " + name;
+        return message;
+    }
+
+    public String affichageCA(int port) {
+        Object[] ca = CA.get(port);
+        return ca.toString();
     }
 
     public String name() {
@@ -81,7 +86,7 @@ public class Equipement extends Server {
 
     public void update() {
         super.update();
-        display.repaint();
+        //display.repaint();
     }
 
     public HashMap<Integer, Object[]> getCA() {
@@ -89,7 +94,7 @@ public class Equipement extends Server {
     }
 
     public void display() {
-        display = new IHMEquipement();
-        display.setVisible(true);
+        //new IHMEquipement(this);
+        //display.setVisible(true);
     }
 }

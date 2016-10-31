@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_tl_crypto" default="compile.module.tl_crypto">
+  <dirname property="module.tl_crypto.basedir" file="${ant.file.module_tl_crypto}"/>
+  
+  <property name="module.jdk.home.tl_crypto" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.tl_crypto" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.tl_crypto" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.tl_crypto" value="-encoding ISO-8859-1 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="tl_crypto.output.dir" value="${module.tl_crypto.basedir}/out/production/TL_crypto"/>
+  <property name="tl_crypto.testoutput.dir" value="${module.tl_crypto.basedir}/out/test/TL_crypto"/>
+  
+  <path id="tl_crypto.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="tl_crypto.module.production.classpath">
+    <path refid="${module.jdk.classpath.tl_crypto}"/>
+    <path refid="library.bcprov-jdk15on-155.classpath"/>
+    <path refid="library.com.google.code.gson:gson:2.7.classpath"/>
+  </path>
+  
+  <path id="tl_crypto.runtime.production.module.classpath">
+    <pathelement location="${tl_crypto.output.dir}"/>
+    <path refid="library.bcprov-jdk15on-155.classpath"/>
+    <path refid="library.com.google.code.gson:gson:2.7.classpath"/>
+  </path>
+  
+  <path id="tl_crypto.module.classpath">
+    <path refid="${module.jdk.classpath.tl_crypto}"/>
+    <pathelement location="${tl_crypto.output.dir}"/>
+    <path refid="library.bcprov-jdk15on-155.classpath"/>
+    <path refid="library.com.google.code.gson:gson:2.7.classpath"/>
+  </path>
+  
+  <path id="tl_crypto.runtime.module.classpath">
+    <pathelement location="${tl_crypto.testoutput.dir}"/>
+    <pathelement location="${tl_crypto.output.dir}"/>
+    <path refid="library.bcprov-jdk15on-155.classpath"/>
+    <path refid="library.com.google.code.gson:gson:2.7.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.tl_crypto">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.tl_crypto">
+    <patternset refid="excluded.from.module.tl_crypto"/>
+  </patternset>
+  
+  <path id="tl_crypto.module.sourcepath">
+    <dirset dir="${module.tl_crypto.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.tl_crypto" depends="compile.module.tl_crypto.production,compile.module.tl_crypto.tests" description="Compile module TL_crypto"/>
+  
+  <target name="compile.module.tl_crypto.production" depends="register.custom.compilers" description="Compile module TL_crypto; production classes">
+    <mkdir dir="${tl_crypto.output.dir}"/>
+    <javac2 destdir="${tl_crypto.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.tl_crypto}/javac">
+      <compilerarg line="${compiler.args.tl_crypto}"/>
+      <bootclasspath refid="tl_crypto.module.bootclasspath"/>
+      <classpath refid="tl_crypto.module.production.classpath"/>
+      <src refid="tl_crypto.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.tl_crypto"/>
+    </javac2>
+    
+    <copy todir="${tl_crypto.output.dir}">
+      <fileset dir="${module.tl_crypto.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.tl_crypto.tests" depends="register.custom.compilers,compile.module.tl_crypto.production" description="compile module TL_crypto; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.tl_crypto" description="cleanup module">
+    <delete dir="${tl_crypto.output.dir}"/>
+    <delete dir="${tl_crypto.testoutput.dir}"/>
+  </target>
+</project>

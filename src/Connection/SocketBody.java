@@ -107,8 +107,16 @@ public final class SocketBody {
         from = request.to;
     }
 
-    public void debug() {
+    public void debug() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        System.out.println("The body of the connection from " + getFromPort() + " to " + getToPort());
+        if (hasCertificat()) {
+            System.out.println("Certificat: " + getCertificat().toString());
+        }
+        if (hasPubKey()) {
+            System.out.println("Public Key: " + getPubKey().toString());
+        }
         System.out.println(getBody().toString());
+
     }
 
     public void setPublicKey(PaireClesRSA key) throws IOException {

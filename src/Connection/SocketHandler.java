@@ -55,8 +55,6 @@ public class SocketHandler {
         //TODO : Add the PGP protocol here
         String decryptedMessage = (String) ois.readObject();
         request = JSONParser.deserialize(decryptedMessage);
-        //
-        request.debug();
     }
 
     public void close() throws IOException {
@@ -140,7 +138,7 @@ public class SocketHandler {
         return request.getCertificat();
     }
 
-    public void debug() {
+    public void debug() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         response.debug();
     }
 
