@@ -140,7 +140,6 @@ public class Client extends IOOperation implements Runnable {
 
 
     public void connect(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, OperatorException, CertException, InterruptedException {
-
         //Set the public Key to decipher the code
         s.setPublicKey(maCle);
         //Check
