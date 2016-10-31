@@ -22,7 +22,7 @@ public class IHMEquipement extends JButton implements MouseListener {
         this.port = port;
         this.equipements = equipements;
         addMouseListener(this);
-        menu = new IHMFirstMenu(equipements, port);
+        //menu = new IHMFirstMenu(equipements, port);
     }
 
     public void mousePressed(MouseEvent e) {
@@ -43,9 +43,5 @@ public class IHMEquipement extends JButton implements MouseListener {
     public void mouseClicked(MouseEvent e) {
         menu.show(e.getComponent(), e.getX(), e.getY());
 
-    }
-
-    public void saySomething(String s) {
-        System.out.print(s);
     }
 }

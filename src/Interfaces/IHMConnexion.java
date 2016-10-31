@@ -23,14 +23,13 @@ public class IHMConnexion extends JFrame {
     /**
      * Create the panel.
      */
-    public IHMConnexion(String host, String client) {
+    public IHMConnexion(String host, String client, boolean isServer) {
         this.host = host;
         this.client = client;
-        setBounds(50, 50, 200, 200);
+        setBounds(150 + (isServer ? 430 : 0), 200, 200, 200);
         setContentPane(panelContent);
         setTitle(host);
         setSize(new Dimension(400, 200));
-        setLocationRelativeTo(null);
         setResizable(false);
         setVisible(true);
 
@@ -45,7 +44,7 @@ public class IHMConnexion extends JFrame {
 
     public boolean doYouAccept(String equiName) {
         int dialogButton = JOptionPane.YES_NO_OPTION;
-        int dialogResult = JOptionPane.showConfirmDialog(this, "The device" + equiName + " is not connected \n do you want to accept the connection with it ?", "Title on Box", dialogButton);
+        int dialogResult = JOptionPane.showConfirmDialog(this, "The device : " + equiName.toUpperCase() + " is not connected \n Do you want to accept the connection ?", "Connection Request", dialogButton);
         return dialogResult == 0;
     }
 
@@ -88,7 +87,6 @@ public class IHMConnexion extends JFrame {
     }
 
     public void accepted() {
-        System.out.print(this.getContentPane().getComponent(1).toString());
         displayMessage("Connection Accepted");
 
     }
@@ -103,7 +101,17 @@ public class IHMConnexion extends JFrame {
     }
 
     public void securityMessage(String message) {
-        displayMessage("Please make sure that your equipement \n display the following message: \n " + message);
+        panelContent.removeAll();
+        JLabel codeLabel = new JLabel("Please make sure you see the code below on your equipement");
+        codeLabel.setBounds(351, 266, 89, 23);
+        panelContent.add(codeLabel);
+        JLabel tokenLabel = new JLabel(message);
+        tokenLabel.setBounds(351, 300, 89, 23);
+        panelContent.add(tokenLabel);
+        panelContent.revalidate();
+        panelContent.repaint();
+        revalidate();
+        repaint();
     }
 
 }

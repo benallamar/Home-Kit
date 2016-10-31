@@ -3,47 +3,54 @@ package HomKit;
 import Component.Equipement;
 import Console.FilerParser;
 import Console.JSONParser;
+import Interfaces.IHMHome.IHMHome;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
  * Project Name : TL_crypto
  */
 public class Home {
-    private static HashSet<Equipement> systemComponent = new HashSet<Equipement>();
+    private static HashMap<Integer, Equipement> equipements = new HashMap<Integer, Equipement>();
+    private static IHMHome homeInterface = null;
 
     public static void checkComponent() {
         //TODO: Check if there been any new file
+        equipements.put(2000, new Equipement("marouane", 2002));
+        equipements.put(3000, new Equipement("marouane", 2003));
+        equipements.put(4000, new Equipement("marouane", 2004));
+        equipements.put(5000, new Equipement("marouane", 2005));
+        equipements.put(6000, new Equipement("marouane", 2006));
+        equipements.put(7000, new Equipement("marouane", 2007));
+        equipements.put(8000, new Equipement("marouane", 2008));
+        equipements.put(9000, new Equipement("marouane", 2009));
         HashSet<String> files = new HashSet<String>();
-        for (String newComName : files) {
-            if (!hasComponent(newComName)) {
-                try {
-                    Equipement newCom = JSONParser.genrateEquipement(newComName);
-                    systemComponent.add(newCom);
-                    newCom.run(systemComponent);
-                } catch (FileNotFoundException e) {
-                    System.out.println(e.getMessage());
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-                }
-            }
+        //for (String newComName : files) {
+        //if (!hasComponent(newComName)) {
 
 
-        }
+        //}
     }
 
     public static boolean hasComponent(String compName) {
-        for (Equipement com : systemComponent) {
-            if (com.isEqual(compName))
-                return true;
-        }
+        //for (Equipement com : systemComponent) {
+        //    if (com.isEqual(compName))
+        //        return true;
+        //}
         return false;
+
     }
 
     public static void run() {
         //TO DO : Run the system
-        checkComponent();
+        try {
+            checkComponent();
+            homeInterface = new IHMHome(equipements);
+        } catch (InterruptedException e) {
+
+        }
     }
 }

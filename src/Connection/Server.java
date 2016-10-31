@@ -1,7 +1,5 @@
 package Connection;
 
-import HomeSecurityLayer.Certificat;
-import HomeSecurityLayer.PaireClesRSA;
 import Interfaces.IHMConnexion;
 import org.bouncycastle.cert.CertException;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -11,9 +9,7 @@ import java.net.ServerSocket;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Set;
 
 /**
  * Created by marouanebenalla on 07/10/2016.
@@ -39,7 +35,8 @@ public class Server extends Client {
     }
 
     public void runServer() {
-        print("server is on");
+        print("server on port : " + port + " is runing");
+        switchMode();
         while (true) {
             try {
 
@@ -52,7 +49,7 @@ public class Server extends Client {
                 //Set the public Key to decipher the code
                 s.setPublicKey(maCle);
                 //We switch from one user to another.
-                IHMConnexion serverDisplay = new IHMConnexion("Server" + getName(), s.getSourceName());
+                IHMConnexion serverDisplay = new IHMConnexion("Server : " + name, s.getSourceName(), true);
                 //Check of is a trusted equipement
                 serverDisplay.checkTrustedEquipement();
                 if (isConnected(s)) {
@@ -114,7 +111,22 @@ public class Server extends Client {
     }
 
 
-    public boolean isConnected(SocketHandler s) {
+    public boolean isConnected(SocketHandler s) throws IOException, OperatorCreationException, CertException, NoSuchAlgorithmException, InvalidKeySpecException {
+        if (s.hasCertificat()) {
+            for (Object[] obj : CA.values()) {
+                if (s.getCertificat().verifiCerif((PublicKey) obj[0])) {
+                    return true;
+                }
+            }
+        }
+        if (s.hasPubKey()) {
+            for (Object[] obj : CA.values()) {
+                if (s.getPubKey().equals(obj[0])) {
+                    print("connected");
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -145,15 +157,15 @@ public class Server extends Client {
     }
 
 
-    public void connectedEquipement(SocketHandler s, IHMConnexion serverDisplay) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ClassNotFoundException, OperatorCreationException, CertException {
+    public void connectedEquipement(SocketHandler s) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, ClassNotFoundException, OperatorCreationException, CertException {
+        s.debug();
         switch (s.getOption()) {
-            case 4:
+            case 3:
                 //Wait for the connection
-                serverDisplay.waitForConnection();
-                connect(s);
+                establishConnection(s);
+                //s.debug();
                 read(s, true);
                 acceptConnection(s);
-                serverDisplay.accepted();
                 break;
             default:
                 print("No known value");
@@ -165,18 +177,20 @@ public class Server extends Client {
     public void notConnectedEquipement(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException, CertException, OperatorCreationException, InvalidKeySpecException, NoSuchAlgorithmException {
 
         if (serverDisplay.doYouAccept(s.getSourceName())) {
-            String[] oauth2 = generateCode(s);
-            serverDisplay.codeDisplay(oauth2[0], oauth2[1]);
+            generateCode(s, serverDisplay);
             read(s, true);
             if (checkCode(s)) {
                 serverDisplay.waitForConnection();
-                connect(s);
+                establishConnection(s);
                 read(s, true);
                 acceptConnection(s);
-                serverDisplay.accepted();
+                serverDisplay.dispose();
                 equipmentToSynchronizeWith(s);//We send the equipement to synchronize with
+                read(s, true);
+                startSynchronization(s);
             } else {
                 unauthorized(s);
+                write(s, false);
                 serverDisplay.refused();
             }
         }
