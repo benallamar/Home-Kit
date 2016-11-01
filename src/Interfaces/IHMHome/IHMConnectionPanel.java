@@ -36,7 +36,7 @@ public class IHMConnectionPanel extends JPanel {
         int width = (int) ((getWidth() / 5));
         int height = (int) ((getHeight() / 5) * 0.6);
         int x = 160;
-        int y = 100;
+        int y = 110;
         int i = 0;
         int size = equis.size();
         for (Equipement equipement : equis) {
@@ -79,7 +79,7 @@ public class IHMConnectionPanel extends JPanel {
         int width = (int) ((getWidth() / 5));
         int height = (int) ((getHeight() / 5) * 0.6);
         int x = 160;
-        int y = 100;
+        int y = 160;
         int i = 0;
         int size = equis.size();
         if (Home.newCo) {
