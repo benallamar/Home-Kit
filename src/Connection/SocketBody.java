@@ -146,4 +146,8 @@ public final class SocketBody {
     public boolean hasPubKey() {
         return public_key != null;
     }
+
+    public void setSourceName(String s) {
+        sourceName = s;
+    }
 }

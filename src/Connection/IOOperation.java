@@ -7,6 +7,7 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 
+import HomKit.Home;
 import HomeSecurityLayer.Certificat;
 import HomeSecurityLayer.PaireClesRSA;
 import Interfaces.IHMHome.IHMHome;
@@ -22,8 +23,8 @@ import java.util.UUID;
  */
 public abstract class IOOperation extends Thread {
     protected ServerSocket server = null;
-    protected PaireClesRSA maCle;
-    protected Certificat monCert;
+    protected PaireClesRSA maCle = null;
+    protected Certificat monCert = null;
     protected String name;
     protected HashMap<Integer, Object[]> CA = new HashMap<Integer, Object[]>();
     protected HashMap<Integer, PublicKey> sessions = new HashMap<Integer, PublicKey>();
@@ -112,8 +113,9 @@ public abstract class IOOperation extends Thread {
         //Instantiate the body of the response
         s.setNewBody();
         //We generate the certificate after accepting the connection
+        String client = s.getSourceName();
         PublicKey pubKey = getSession(s);
-        Certificat cert = new Certificat(name, pubKey, maCle.privKey(), 356);
+        Certificat cert = new Certificat(name, client, pubKey, maCle.privKey(), 356);
         s.setCertificat(cert);
         //print(cert.toString());
         //Set the status for the response
@@ -133,7 +135,7 @@ public abstract class IOOperation extends Thread {
     }
 
     public void update() {
-        IHMHome.update();
+        Home.update();
     }
 
     public int getPort() {

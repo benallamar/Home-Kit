@@ -1,6 +1,4 @@
 {
   "name": "x_5",
-  "type": "DVD",
-  "port": "12334",
-  "parent_type": "A_A"
+  "port": 2005
 }

@@ -2,7 +2,11 @@ package Component;
 
 import Connection.Server;
 import HomeSecurityLayer.Certificat;
+import Interfaces.IHMEquipement;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
+import org.bouncycastle.crypto.util.PublicKeyFactory;
 
+import java.io.IOException;
 import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,22 +15,26 @@ import java.util.HashSet;
  * Project Name : TL_crypto
  */
 public class Equipement extends Server {
-    //private IHMEquipement display;
+    private IHMEquipement display = null;
 
     public Equipement(String name, int port) {
         // Define the component
         super(name, port);
-        //display = new IHMEquipement();
     }
 
     public boolean isEqual(String name) {
         return this.name == name;
     }
 
+    public boolean isEqual(Equipement equipement) {
+        return name() == equipement.name();
+    }
+
 
     public String affichage() {
-
         String message = "Component: " + name;
+        message += "\nPort:      " + port;
+        message += "\nPublic Key:      " + maCle.pubKey().toString().substring(0, 30) + "...";
         return message;
     }
 
@@ -37,7 +45,7 @@ public class Equipement extends Server {
 
     public String name() {
 
-        return name + "\n\n" + port;
+        return "Equi: " + name.toUpperCase() + "\n Port: " + port;
     }
 
     public PublicKey maClePub() {
@@ -53,9 +61,6 @@ public class Equipement extends Server {
         return this;
     }
 
-    public void setParent(Equipement parent) {
-        //TODO: Try to fix this one
-    }
 
     public Equipement setMonCert(Certificat cert) {
         monCert = cert;
@@ -83,10 +88,14 @@ public class Equipement extends Server {
 
     }
 
+    public boolean connectedWith(Equipement equi) {
+        return CA.containsKey(equi.port);
+    }
 
     public void update() {
         super.update();
-        //display.repaint();
+        if (display != null)
+            display.repaint();
     }
 
     public HashMap<Integer, Object[]> getCA() {
@@ -94,7 +103,36 @@ public class Equipement extends Server {
     }
 
     public void display() {
-        //new IHMEquipement(this);
-        //display.setVisible(true);
+        display = new IHMEquipement(this);
+    }
+
+    public String[] CAArray() {
+        String[] array = new String[CA.size()];
+        int i = 0;
+        for (Object[] obj : CA.values()) {
+            array[i] = ((Certificat) obj[1]).getIssuer();
+            i++;
+        }
+        return array;
+    }
+
+    public String getCertCA(int index) throws IOException {
+        int i = 0;
+        for (Object[] obj : CA.values()) {
+            if (index == i) {
+                return ((Certificat) obj[1]).display();
+            }
+            i++;
+        }
+        return "No certificate with the given index";
+    }
+
+    public static boolean equiExist(String name, int port, HashSet<Equipement> equipements) {
+        for (Equipement equipement : equipements) {
+            if (equipement.port == port) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -20,12 +20,17 @@ public class Client extends IOOperation implements Runnable {
     private int serverPort = 0;
     private int option = 0;
     private int parentPort = 0;
-    private LinkedList<Integer> equiToSynWith = new LinkedList<Integer>();
+    private String host = "localhost";
+    private LinkedList<int[]> equiToSynWith = new LinkedList<int[]>();
 
-    public Client(String hostName, int port) {
+    public Client(String name, int port) {
         maCle = new PaireClesRSA(1024);
-        name = hostName;
+        this.name = name;
         this.port = port;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
     }
 
     public void runClient() {
@@ -35,15 +40,15 @@ public class Client extends IOOperation implements Runnable {
             SocketHandler s = null;
             switch (option) {
                 case 1:
-                    s = new SocketHandler("localhost", port, serverPort, name);
+                    s = new SocketHandler(host, port, serverPort, name);
                     IHMConnexion serverDisplay = new IHMConnexion("Client : " + name, "" + serverPort, false);
                     connect(s, serverDisplay);
                     serverDisplay.dispose();
                     break;
                 case 2:
-                    int srvPort = equiToSynWith.pop();
-                    s = new SocketHandler("localhost", port, srvPort, name);
-                    synchronize(s);
+                    int[] conParams = equiToSynWith.pop();
+                    s = new SocketHandler("localhost", port, conParams[1], name);
+                    synchronize(s, conParams[0]);
                     break;
                 default:
                     close(s);
@@ -173,6 +178,8 @@ public class Client extends IOOperation implements Runnable {
             //Get the request from the client
             s.setSuccess();
             //We sen the information to the server
+            s.setSourceName(name);
+            //Send the request
             write(s, true);
             //Set that we accept the connection
             read(s, true);
@@ -181,13 +188,12 @@ public class Client extends IOOperation implements Runnable {
                 acceptConnection(s);
                 establishConnection(s);//What do we have after that one ?
                 read(s, true);
-                print("Start synchron for the client");
                 startSynchronization(s);
                 equipmentToSynchronizeWith(s);
                 //For display proposal
                 serverDisplay.dispose();
-                update();
             } else {
+                //TODO: Check why this is no displaying conneciton refused ?
                 serverDisplay.refused();
             }
         }
@@ -214,18 +220,16 @@ public class Client extends IOOperation implements Runnable {
         int k = 1;
         while (s.hasKey("key_" + k)) {
             Double desPort = (Double) s.getKey("key_" + k);
-            print("Synchronize the equipement:" + port + " with the equipement:" + desPort.intValue());
             setOption(2);
-            setParentPort(s.getFromPort());
-            print("Set the parent port");
-            equiToSynWith.push(desPort.intValue());
-            print("Set the ports");
-            new Thread(this).start();
+            if (!CA.containsKey(desPort.intValue())) {
+                equiToSynWith.push(new int[]{s.getFromPort(), desPort.intValue()});
+                new Thread(this).start();
+            }
             k++;
         }
     }
 
-    public void synchronize(SocketHandler s) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, OperatorException, CertException, InterruptedException {
+    public void synchronize(SocketHandler s, int parentPort) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, OperatorException, CertException, InterruptedException {
         //We show a message
         print("Start the synchronisation of the equipement " + port + " with the equipement " + serverPort);
         //We set the option of the message
@@ -233,10 +237,8 @@ public class Client extends IOOperation implements Runnable {
         //Set the public Key to decipher the code
         s.setPublicKey(maCle);
         //We send the certificat too
-        print("test");
         s.setCertificat((Certificat) CA.get(parentPort)[1]);
         //print
-        print("test");
         s.debug();
         //We have to check if is not connected.
         ack(s);
@@ -250,6 +252,9 @@ public class Client extends IOOperation implements Runnable {
         if (s.isSuccess()) {
             acceptConnection(s);
             establishConnection(s);
+            read(s, true);
+            startSynchronization(s);
+            equipmentToSynchronizeWith(s);
         }
         close(s);
         print(CA.toString());

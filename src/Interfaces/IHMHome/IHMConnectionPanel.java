@@ -1,6 +1,7 @@
 package Interfaces.IHMHome;
 
 import Component.Equipement;
+import HomKit.Home;
 
 import javax.swing.*;
 import javax.swing.text.html.HTMLDocument;
@@ -15,37 +16,104 @@ import java.util.Iterator;
  */
 public class IHMConnectionPanel extends JPanel {
     HashSet<IHMHomeEquipement> equipements = new HashSet<IHMHomeEquipement>();
+    HashSet<Equipement> equis = new HashSet<Equipement>();
 
-    public IHMConnectionPanel(HashMap<Integer, Equipement> equipements) throws InterruptedException {
+    public IHMConnectionPanel(HashSet<Equipement> equipements) throws InterruptedException {
         super();
+        equis = equipements;
+        setLayout(null);
         setSize(new Dimension(1000, 600));
-        int width = (int) ((getWidth() / 5) * 0.75);
-        int height = (int) ((getHeight() / 5) * 0.30);
-        int x = 100;
-        int y = 100;
-        for (Equipement equipement : equipements.values()) {
-            equipement.start();
-            IHMHomeEquipement equi = new IHMHomeEquipement(equipement, equipements, x, y, width, height);
-            this.equipements.add(equi);
-            add(equi);
-            x = x + 2 * width;
-            if (x > getWidth()) {
-                y += 4 * height;
-                x = x % getWidth();
-            }
-            if (x == getWidth()) {
-                y += 4 * height;
-                x = (3 * width) % getWidth();
-            }
-        }
-        repaint();
-
+        final JLabel label2 = new JLabel();
+        label2.setBackground(new Color(-983553));
+        label2.setIcon(new ImageIcon(getClass().getResource("/icons/logo.png")));
+        label2.setText("");
+        label2.setBounds(0, 0, 150, 150);
+        add(label2);
+        initiate();
     }
 
+    public void initiate() {
+        int width = (int) ((getWidth() / 5));
+        int height = (int) ((getHeight() / 5) * 0.6);
+        int x = 160;
+        int y = 100;
+        int i = 0;
+        int size = equis.size();
+        for (Equipement equipement : equis) {
+            if (!equipement.isAlive() || equipement.isDaemon()) {
+                equipement.start();
+            }
+            if (x + width > getWidth()) {
+                y += height * (1 + Math.random());
+                x = (x + width) % getWidth();
+            }
+            if (x + width == getWidth()) {
+                y += height * (1 + Math.random());
+                x = ((int) (3 * width * Math.random())) % getWidth();
+            }
+            IHMHomeEquipement equi = new IHMHomeEquipement(equipement, equis, x, y, width, height);
+            this.equipements.add(equi);
+            add(equi);
+            x = x + (int) (1.5 * width);
+            Home.loadPage.setValue(20 + i * 100 / size);
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                System.out.print(e.fillInStackTrace());
+            }
+            i++;
+        }
+        Home.loadPage.setValue(100);
+        revalidate();
+        repaint();
+    }
+
+    public void update() {
+        removeAll();
+        final JLabel label2 = new JLabel();
+        label2.setBackground(new Color(-983553));
+        label2.setIcon(new ImageIcon(getClass().getResource("/icons/logo-big.png")));
+        label2.setText("");
+        label2.setBounds(0, 0, 150, 150);
+        add(label2);
+        int width = (int) ((getWidth() / 5));
+        int height = (int) ((getHeight() / 5) * 0.6);
+        int x = 160;
+        int y = 100;
+        int i = 0;
+        int size = equis.size();
+        if (Home.newCo) {
+            equipements = new HashSet<IHMHomeEquipement>();
+            for (Equipement equipement : equis) {
+                if (!equipement.isAlive() || equipement.isDaemon()) {
+                    equipement.start();
+                }
+                if (x + width > getWidth()) {
+                    y += height * (1 + Math.random());
+                    x = (x + width) % getWidth();
+                }
+                if (x + width == getWidth()) {
+                    y += height * (1 + Math.random());
+                    x = ((int) (3 * width * Math.random())) % getWidth();
+                }
+                IHMHomeEquipement equi = new IHMHomeEquipement(equipement, equis, x, y, width, height);
+                this.equipements.add(equi);
+                add(equi);
+                x = x + (int) (1.5 * width);
+                i++;
+            }
+            Home.newCo = false;
+        } else {
+            for (IHMHomeEquipement equipement : equipements) {
+                add(equipement);
+            }
+        }
+        revalidate();
+        repaint();
+    }
 
     public void paintComponent(Graphics g) {
         for (IHMHomeEquipement interEqu : equipements) {
-
             Iterator it = interEqu.getEquipement().getCA().entrySet().iterator();
             while (it.hasNext()) {
                 HashMap.Entry pair = (HashMap.Entry) it.next();
@@ -72,7 +140,6 @@ public class IHMConnectionPanel extends JPanel {
                     g.setColor(new Color(26, 193, 18));
                     if (!interEqu.getEquipement().isOn() || !interEqu2.getEquipement().isOn())
                         g.setColor(new Color(142, 9, 9));
-
                 }
             }
         }

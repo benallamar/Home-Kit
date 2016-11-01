@@ -149,4 +149,8 @@ public class SocketHandler {
     public boolean hasCertificat() {
         return request.hasCertificat();
     }
+
+    public void setSourceName(String s) {
+        response.setSourceName(s);
+    }
 }

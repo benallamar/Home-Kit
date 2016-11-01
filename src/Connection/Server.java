@@ -30,7 +30,7 @@ public class Server extends Client {
             server = new ServerSocket(port);
             on = true;
         } catch (IOException e) {
-            System.out.println("Error 1" + e.getMessage());
+            System.out.println("Error 1" + e.getMessage() + " with the port " + port);
         }
     }
 
@@ -39,7 +39,7 @@ public class Server extends Client {
         switchMode();
         while (true) {
             try {
-
+                System.out.print(name);
                 SocketHandler s = new SocketHandler(server.accept(), name);
                 //We get the information from the client
                 read(s, false);
@@ -179,7 +179,9 @@ public class Server extends Client {
                 establishConnection(s);
                 read(s, true);
                 acceptConnection(s);
-                print("Equipement " + port + " Connected Equipement" + CA.toString());
+                equipmentToSynchronizeWith(s);//We send the equipement to synchronize with
+                read(s, true);
+                startSynchronization(s);
                 break;
             default:
                 print("No known value");
@@ -207,6 +209,10 @@ public class Server extends Client {
                 write(s, false);
                 serverDisplay.refused();
             }
+        } else {
+            unauthorized(s);
+            write(s, false);
+            serverDisplay.dispose();
         }
 
     }
