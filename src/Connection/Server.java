@@ -1,5 +1,6 @@
 package Connection;
 
+import Console.ConsoleDisplay;
 import HomKit.Home;
 import Interfaces.IHMConnexion;
 import org.bouncycastle.cert.CertException;
@@ -37,7 +38,7 @@ public class Server extends Client {
 
     public void runServer() {
         if (Home.DEBUG_MODE)
-            print("server on port : " + port + " is runing");
+            ConsoleDisplay.warning("server on port : " + port + " is runing", true);
         switchMode();
         while (true) {
             try {

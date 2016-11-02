@@ -178,4 +178,8 @@ public class SocketHandler {
     public void setSourceName(String s) {
         response.setSourceName(s);
     }
+
+    public void setEmptyBody() {
+        response.setEmptyBody();
+    }
 }

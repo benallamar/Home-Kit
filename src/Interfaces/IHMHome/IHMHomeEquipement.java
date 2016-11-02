@@ -13,29 +13,26 @@ import Component.Equipement;
  */
 public class IHMHomeEquipement extends JButton {
     Equipement equipement;
-    HashSet<Equipement> equipements = new HashSet<Equipement>();
 
-    public IHMHomeEquipement(Equipement equipement, HashSet<Equipement> equipements, int x, int y, int width, int height) {
+    public IHMHomeEquipement(Equipement equipement, int x, int y, int width, int height) {
         this.equipement = equipement;
-        this.equipements = equipements;
         // Set the picture
         final JLabel label = new JLabel();
         label.setIcon(new ImageIcon(getClass().getResource("/data/icons/1477973680_computer.png")));
         setText(equipement.name());
         add(label);
         setBounds(x, y, width, height);
-        if (equipement.isOn()) {
+        if (equipement.isOn())
             setBackground(new Color(177, 218, 19));
-        } else {
-            setBackground(new Color(254, 79, 18));
-        }
         setBackground(new Color(-3826981));
         setContentAreaFilled(false);
         setForeground(new Color(-6112475));
         setText(equipement.name());
-        setComponentPopupMenu(new IHMFirstMenu(equipements, equipement));
+        setComponentPopupMenu(new IHMFirstMenu(equipement));
         //Set the action to open the "Information Equipement" JFrame
-        addActionListener(event ->{equipement.display();});
+        addActionListener(event -> {
+            equipement.display();
+        });
     }
 
     public Equipement getEquipement() {

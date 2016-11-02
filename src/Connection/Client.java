@@ -1,6 +1,6 @@
 package Connection;
 
-
+import Console.ConsoleDisplay;
 import HomKit.Home;
 import HomeSecurityLayer.Certificat;
 import HomeSecurityLayer.PaireClesRSA;
@@ -213,13 +213,11 @@ public class Client extends IOOperation implements Runnable {
     that the equipment server trust, so we should send this information to the equipment client
      */
     public void equipmentToSynchronizeWith(SocketHandler s) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
-
+        //We reset the body of the response
         s.setNewBody();
         int key = 1;
         for (int portEqui : CA.keySet()) {
             if (portEqui != s.getFromPort()) {
-                if (Home.DEBUG_MODE)
-                    print("Synchroniztion of the equipement " + s.getFromPort() + " to the one connected on the port: " + portEqui);
                 s.setKey("key_" + key, portEqui);
                 key++;
             }
@@ -247,38 +245,41 @@ public class Client extends IOOperation implements Runnable {
         s.setOption(3);
         //Set the public Key to decipher the code
         s.setPublicKey(maCle);
-        //We send the certificat too
+        //We send the certificate too
         s.setCertificat((Certificat) CA.get(parentPort)[1]);
-        //print
-        s.debug();
         //We have to check if is not connected.
         ack(s);
         //Get the response from the server
         read(s, false);
-        //Create the session for that user
-        openSession(s);
-        //Set the header of the response
-        s.setHeader();
-        //Set the display
         if (s.isSuccess()) {
+            //Create the session for that user
+            openSession(s);
+            //We accept the connection and we save the certificat that we get from the server
             acceptConnection(s);
+            //We create also a certificate and we send it to the client, so that he could use it to connect with
             establishConnection(s);
+            //We listen to the server
             read(s, false);
+            //We receive the equipements to synchronize with, and we start the process of synchronization
             startSynchronization(s);
+            //We send the equipments that we trust as well.
             equipmentToSynchronizeWith(s);
         }
+        //We close the connection
         close(s);
-        print(CA.toString());
     }
 
     public void setNextOperation(int option, int desPort, String host, int sourcePort) {
         if (Home.DEBUG_MODE)
             switch (option) {
                 case 1:
-                    print("Asking new connection");
+                    ConsoleDisplay.information("Asking new connection", true);
                     break;
                 case 2:
-                    print("Asking for synchronization");
+                    ConsoleDisplay.information("Asking for synchronization from the port : " + port + " to the port : " + desPort, true);
+                    break;
+                default:
+                    ConsoleDisplay.warning("You are asking for an option that hasn't been created yet, please create it and try again", true);
             }
         nextOperations.push(new Object[]{option, desPort, host, sourcePort});
         //And yeah, we run a thread for every instruction

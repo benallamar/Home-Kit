@@ -21,7 +21,7 @@ public class IHMHome extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.equipements = equipements;
         try {
-            contentPane = new IHMConnectionPanel(equipements);
+            contentPane = new IHMConnectionPanel();
 
         } catch (InterruptedException e) {
 

@@ -1,39 +1,36 @@
 package HomKit;
 
 import Component.Equipement;
-import Console.FilerParser;
 import Console.JSONParser;
 import Interfaces.IHMHome.IHMHome;
 import Interfaces.IHMHome.Loading;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Project Name : TL_crypto
  */
 public class Home extends Thread implements Runnable {
-    private HashSet<Equipement> equipements = new HashSet<Equipement>();
+    public static HashSet<Equipement> equipements = new HashSet<Equipement>();
     private static IHMHome homeInterface = null;
     private boolean check_new_equi = false;
     final static int TIME_CHECK = 5000; //Check the new equipements every TIME_CHECK Seconds
+    public final static String EQUIPMENT_DIRECTORY = "src/data/CompData/";
     public static boolean DEBUG_MODE = true;
     public static Loading loadPage = null;
     public static boolean newCo = false;
 
     public void checkComponent() {
         try {
-            List<File> filesInFolder = Files.walk(Paths.get("src/data/CompData/"))
+            //We get all the file of the given directory
+            List<File> filesInFolder = Files.walk(Paths.get(EQUIPMENT_DIRECTORY))
                     .filter(Files::isRegularFile)
                     .map(Path::toFile)
                     .collect(Collectors.toList());
