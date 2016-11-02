@@ -22,15 +22,17 @@ public class Equipement extends Server {
         super(name, port);
     }
 
-    public boolean isEqual(String name) {
-        return this.name == name;
-    }
-
+    //Check if an equipement is equal to other
     public boolean isEqual(Equipement equipement) {
-        return name() == equipement.name();
+        return port == equipement.port;
     }
 
+    //Check if an equipement is equal to an other one
+    public boolean isEqual(int port) {
+        return this.port == port;
+    }
 
+    //Display the information about the equipement
     public String affichage() {
         String message = "Component: " + name;
         message += "\nPort:      " + port;
@@ -38,10 +40,6 @@ public class Equipement extends Server {
         return message;
     }
 
-    public String affichageCA(int port) {
-        Object[] ca = CA.get(port);
-        return ca.toString();
-    }
 
     public String name() {
 
@@ -49,51 +47,23 @@ public class Equipement extends Server {
     }
 
     public PublicKey maClePub() {
-        // Return the publicKe
         return monCert.getPublicKey();
     }
 
-    public Equipement setCertificateForChild(Equipement childComponent) {
-        return this;
-    }
-
-    public Equipement addChildComp(Equipement childComponent) {
-        return this;
-    }
-
-
-    public Equipement setMonCert(Certificat cert) {
-        monCert = cert;
-        return this;
-    }
-
-    public HashSet<Equipement> getChilds() {
-        return new HashSet<Equipement>();
-    }
 
     public Certificat maCertif() {
         return monCert;
     }
 
-    public String toString() {
-        String description = "";
-        description += "";
-        return description;
-    }
-
-    public void run(HashSet<Equipement> systemComponent) {
-        //Here We have to establish the communication with the other component
-
-        super.run();
-
-    }
-
+    //Check if the equipement is connected with the given in params
     public boolean connectedWith(Equipement equi) {
         return CA.containsKey(equi.port);
     }
 
+    //Update the GUI
     public void update() {
         super.update();
+        //if the user has done some operation while the "Information window".
         if (display != null)
             display.repaint();
     }
@@ -102,20 +72,29 @@ public class Equipement extends Server {
         return CA;
     }
 
+    //Open the window of the project.
     public void display() {
         display = new IHMEquipement(this);
     }
+
+    /*
+    Transform the CA HashMap to Array of Certificates(We use this to display the Authorities certificate that have signed
+     a certificate to the equipement)
+     */
 
     public String[] CAArray() {
         String[] array = new String[CA.size()];
         int i = 0;
         for (Object[] obj : CA.values()) {
-            array[i] = ((Certificat) obj[1]).getIssuer();
+            array[i] = ((Certificat) obj[1]).getIssuer();//We set as information the issuer of the certificate
             i++;
         }
         return array;
     }
 
+    /*
+    Get the certificat of the Equipement index with the given index in params
+     */
     public String getCertCA(int index) throws IOException {
         int i = 0;
         for (Object[] obj : CA.values()) {
@@ -127,9 +106,12 @@ public class Equipement extends Server {
         return "No certificate with the given index";
     }
 
-    public static boolean equiExist(String name, int port, HashSet<Equipement> equipements) {
+    /*
+    Check if the given
+     */
+    public static boolean equiExist(int port, HashSet<Equipement> equipements) {
         for (Equipement equipement : equipements) {
-            if (equipement.port == port) {
+            if (equipement.isEqual(port)) {
                 return true;
             }
         }

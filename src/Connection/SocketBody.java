@@ -1,5 +1,6 @@
 package Connection;
 
+import Console.ConsoleDisplay;
 import HomeSecurityLayer.Certificat;
 import HomeSecurityLayer.PaireClesRSA;
 
@@ -108,15 +109,15 @@ public final class SocketBody {
     }
 
     public void debug() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        System.out.println("The body of the connection from " + getFromPort() + " to " + getToPort());
+        ConsoleDisplay.warning("The body of the connection from " + getFromPort() + " to " + getToPort(), true);
         if (hasCertificat()) {
-            System.out.println("Certificat: " + getCertificat().toString());
+            ConsoleDisplay.infoTitle("Certificat: ", true);
+            ConsoleDisplay.information(getCertificat().toString(), false);
         }
         if (hasPubKey()) {
-            System.out.println("Public Key: " + getPubKey().toString());
+            ConsoleDisplay.infoTitle("Public Key: ", true);
+            ConsoleDisplay.information(getPubKey().toString(), false);
         }
-        System.out.println(getBody().toString());
-
     }
 
     public void setPublicKey(PaireClesRSA key) throws IOException {
@@ -136,7 +137,9 @@ public final class SocketBody {
     }
 
     public boolean hasKkey(String key) {
-        return body.containsKey(key);
+        if (body != null)
+            return body.containsKey(key);
+        return false;
     }
 
     public boolean hasCertificat() {
@@ -149,5 +152,9 @@ public final class SocketBody {
 
     public void setSourceName(String s) {
         sourceName = s;
+    }
+
+    public void setEmptyBody() {
+        body = null;
     }
 }

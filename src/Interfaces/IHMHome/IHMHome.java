@@ -21,7 +21,7 @@ public class IHMHome extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.equipements = equipements;
         try {
-            contentPane = new IHMConnectionPanel(equipements);
+            contentPane = new IHMConnectionPanel();
 
         } catch (InterruptedException e) {
 
@@ -29,9 +29,9 @@ public class IHMHome extends JFrame {
         setContentPane(contentPane);
         setSize(new Dimension(contentPane.getWidth(), contentPane.getHeight()));
         setLocationRelativeTo(null);
-        //setResizable(false);
         Home.loadPage.dispose();
-        setFocusable(true);
+        requestFocus();
+        setResizable(false);
         setVisible(true);
 
     }

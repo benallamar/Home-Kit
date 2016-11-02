@@ -1,6 +1,7 @@
 package Interfaces.IHMHome;
 
 import Component.Equipement;
+import HomKit.Home;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;
@@ -14,14 +15,14 @@ import java.util.HashSet;
 class IHMFirstMenu extends JPopupMenu {
     JMenuItem anItem;
 
-    public IHMFirstMenu(Collection<Equipement> equipements, Equipement equipement) {
+    public IHMFirstMenu(Equipement equipement) {
         //Open config
         JMenu connect = new JMenu("connect");
-        for (Equipement equip : equipements) {
+        Home.equipements.forEach(equip -> {
             if (!equip.equals(equipement) && !equip.connectedWith(equipement)) {
                 connect.add(new IHMSecondMenu(equipement, equip));
             }
-        }
+        });
         add(connect);
     }
 }

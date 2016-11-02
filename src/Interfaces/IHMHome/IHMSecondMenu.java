@@ -12,7 +12,7 @@ import java.awt.event.MouseListener;
 /**
  * Project Name : TL_crypto
  */
-class IHMSecondMenu extends JMenuItem implements MouseListener {
+class IHMSecondMenu extends JMenuItem {
     Equipement client;
     Equipement server;
 
@@ -21,30 +21,9 @@ class IHMSecondMenu extends JMenuItem implements MouseListener {
         super(serverEqui.name());
         client = clientEqui;
         server = serverEqui;
-        addMouseListener(this);
+        //Add an action listner
+        addActionListener(event -> {
+            client.setNextOperation(1, server.getPort(), "localhost", 0);
+        });
     }
-
-    public void mousePressed(MouseEvent e) {
-        client.setClientMode();
-        client.setOption(1);
-        client.setServerPort(server.getPort());
-        new Thread(client).start();
-    }
-
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    public void mouseExited(MouseEvent e) {
-
-    }
-
-    public void mouseClicked(MouseEvent e) {
-
-    }
-
 }

@@ -1,5 +1,7 @@
 package Connection;
 
+import Console.ConsoleDisplay;
+import HomKit.Home;
 import Interfaces.IHMConnexion;
 import org.bouncycastle.cert.CertException;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -15,7 +17,7 @@ import java.util.LinkedList;
  * Created by marouanebenalla on 07/10/2016.
  */
 /*
-For server there are four main option:
+For server there are TREE main options:
     1- Connect.
     2- Connection Accepted.
     3- Do you trust the equipement with the given id.
@@ -35,15 +37,17 @@ public class Server extends Client {
     }
 
     public void runServer() {
-        print("server on port : " + port + " is runing");
+        if (Home.DEBUG_MODE)
+            ConsoleDisplay.warning("server on port : " + port + " is runing", true);
         switchMode();
         while (true) {
             try {
-                System.out.print(name);
                 SocketHandler s = new SocketHandler(server.accept(), name);
                 //We get the information from the client
                 read(s, false);
                 //Open the sessions
+                s.debug();
+                //We define the combination
                 openSession(s);
                 //Set the response of our header
                 s.setHeader();
@@ -149,7 +153,7 @@ public class Server extends Client {
         return s.isSuccess();
     }
 
-    public String[] generateCode(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException {
+    public String[] generateCode(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
         //Generate the code and the token
         String[] oauth2 = genKeyToken(maCle.pubKey());
 
@@ -177,10 +181,10 @@ public class Server extends Client {
             case 3:
                 //Wait for the connection
                 establishConnection(s);
-                read(s, true);
+                read(s, false);
                 acceptConnection(s);
                 equipmentToSynchronizeWith(s);//We send the equipement to synchronize with
-                read(s, true);
+                read(s, false);
                 startSynchronization(s);
                 break;
             default:
@@ -193,15 +197,21 @@ public class Server extends Client {
     public void notConnectedEquipement(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException, CertException, OperatorCreationException, InvalidKeySpecException, NoSuchAlgorithmException {
 
         if (serverDisplay.doYouAccept(s.getSourceName())) {
+            //We have accept the connection
+            s.setPublicKey(maCle);
+            //We don't do any thing important, we just check hands and set Key informations
+            write(s, false);
+            //We get the empty response of the client
+            read(s, false);
             generateCode(s, serverDisplay);
-            read(s, true);
+            read(s, false);
             if (checkCode(s)) {
                 serverDisplay.waitForConnection();
                 establishConnection(s);
-                read(s, true);
+                read(s, false);
                 acceptConnection(s);
                 equipmentToSynchronizeWith(s);//We send the equipement to synchronize with
-                read(s, true);
+                read(s, false);
                 startSynchronization(s);
                 serverDisplay.dispose();
             } else {

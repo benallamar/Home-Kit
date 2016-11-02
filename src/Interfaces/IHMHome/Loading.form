@@ -23,7 +23,7 @@
           <enabled value="false"/>
           <font name="Ayuthaya" size="10" style="0"/>
           <foreground color="-12040120"/>
-          <text value="This software has been developed under MIT Licence, so you have the right to update it, change it or remove any thing you find useless but don't forget the persons who speends hours in developing it.&#10;&#10;"/>
+          <text value="This software has been developed under MIT Licence, so you have the right to update it, change it or remove any thing you find useless but don't forget the persons who speend hours in developing it.&#10;This project has been created for educational purpose, if you need any further information about it just contact us.&#10;"/>
         </properties>
       </component>
       <component id="1c1c1" class="javax.swing.JTextPane" binding="allTheRightsAreTextPane" default-binding="true">
@@ -88,7 +88,7 @@
         </constraints>
         <properties>
           <background color="-983553"/>
-          <icon value="icons/SEO-Connected-pic.png"/>
+          <icon value="data/icons/SEO-Connected-pic.png"/>
           <text value=""/>
         </properties>
       </component>

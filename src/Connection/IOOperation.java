@@ -32,13 +32,17 @@ public abstract class IOOperation extends Thread {
     protected LinkedList<String> errors = new LinkedList<String>();
     boolean mode_server = true;
 
-    // @over
-    public void write(SocketHandler s, boolean encrypt) throws IOException, ClassNotFoundException {
-        s.write(maCle, encrypt);
+    //Write the response to the server
+    public void write(SocketHandler s, boolean encrypt) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
+        s.write(maCle.privKey(), false);
     }
-
+    //Read the response from the server
     public void read(SocketHandler s, boolean decrypt) throws IOException, ClassNotFoundException {
-        s.read(maCle, decrypt);
+        if (decrypt) {
+            s.read(getSession(s), decrypt);
+        } else {
+            s.read();
+        }
     }
 
     public void print(String string) {
@@ -74,7 +78,7 @@ public abstract class IOOperation extends Thread {
         return sessions.get(s.getFromPort());
     }
 
-    public void unauthorized(SocketHandler s) throws IOException, ClassNotFoundException {
+    public void unauthorized(SocketHandler s) throws IOException, ClassNotFoundException, InvalidKeySpecException, NoSuchAlgorithmException {
         //set the option that you have and error and close the connection
         s.response.setNewBody();
         s.response.setFailed();

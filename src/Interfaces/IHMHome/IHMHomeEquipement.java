@@ -4,8 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.HashMap;
 import java.util.HashSet;
 
 import Component.Equipement;
@@ -15,31 +13,25 @@ import Component.Equipement;
  */
 public class IHMHomeEquipement extends JButton {
     Equipement equipement;
-    HashSet<Equipement> equipements = new HashSet<Equipement>();
 
-    public IHMHomeEquipement(Equipement equipement, HashSet<Equipement> equipements, int x, int y, int width, int height) {
+    public IHMHomeEquipement(Equipement equipement, int x, int y, int width, int height) {
         this.equipement = equipement;
-        this.equipements = equipements;
-        JLabel label1 = new JLabel();
-        label1.setIcon(new ImageIcon(getClass().getResource("/icons/1477973680_computer.png")));
-        setText(" " + equipement.name());
-        add(label1);
+        // Set the picture
+        final JLabel label = new JLabel();
+        label.setIcon(new ImageIcon(getClass().getResource("/data/icons/1477973680_computer.png")));
+        setText(equipement.name());
+        add(label);
         setBounds(x, y, width, height);
-        if (equipement.isOn()) {
+        if (equipement.isOn())
             setBackground(new Color(177, 218, 19));
-        } else {
-            setBackground(new Color(254, 79, 18));
-        }
         setBackground(new Color(-3826981));
         setContentAreaFilled(false);
         setForeground(new Color(-6112475));
         setText(equipement.name());
-        setComponentPopupMenu(new IHMFirstMenu(equipements, equipement));
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                equipement.display();
-            }
+        setComponentPopupMenu(new IHMFirstMenu(equipement));
+        //Set the action to open the "Information Equipement" JFrame
+        addActionListener(event -> {
+            equipement.display();
         });
     }
 

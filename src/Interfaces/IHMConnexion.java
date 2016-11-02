@@ -16,6 +16,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.concurrent.TimeUnit;
 
+/*
+
+This Class is to display all the message of the current happening actions.
+    - 1 - Do you accept Connection.
+    - 2 - Do you see the same message.
+    - 3 - Connection accepted.
+    - 3 - Waiting for connection.
+    - 4 - Connection Refused
+ */
 public class IHMConnexion extends JFrame {
     private JPanel panelContent = new JPanel();
     private String host, client;
@@ -29,6 +38,8 @@ public class IHMConnexion extends JFrame {
         setBounds(150 + (isServer ? 430 : 0), 200, 200, 200);
         setContentPane(panelContent);
         setTitle(host);
+        setUndecorated(true);
+        getRootPane().setWindowDecorationStyle(JRootPane.NONE);
         setSize(new Dimension(400, 200));
         setResizable(false);
         setVisible(true);
@@ -36,7 +47,7 @@ public class IHMConnexion extends JFrame {
     }
 
     public boolean authenticate(SocketHandler s, Client client) throws InterruptedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        ImageIcon icon = new ImageIcon("src/icons/logo.png");
+        ImageIcon icon = new ImageIcon("src/data/icons/logo.png");
         String message = IOOperation.genKeyMessage(s.getPubKey(), (String) s.getKey("token"), (String) s.getKey("code"));
         int dialogButton = JOptionPane.YES_NO_OPTION;
         int dialogResult = JOptionPane.showConfirmDialog(this, "Do you see this: \n " + message + "\n on your system panel ?", " Avoid Man In The Middle Attack", dialogButton, JOptionPane.INFORMATION_MESSAGE, icon);
@@ -44,9 +55,9 @@ public class IHMConnexion extends JFrame {
     }
 
     public boolean doYouAccept(String equiName) {
-        ImageIcon icon = new ImageIcon("src/icons/logo.png");
+        ImageIcon icon = new ImageIcon("src/data/icons/logo.png");
         int dialogButton = JOptionPane.YES_NO_OPTION;
-        int dialogResult = JOptionPane.showConfirmDialog(this, "The device : " + equiName.toUpperCase() + " is not connected \n Do you want to accept the connection ?", "Connection Request", dialogButton,JOptionPane.INFORMATION_MESSAGE, icon);
+        int dialogResult = JOptionPane.showConfirmDialog(this, "The device : " + equiName.toUpperCase() + " is not connected \n Do you want to accept the connection ?", "Connection Request", dialogButton, JOptionPane.INFORMATION_MESSAGE, icon);
         return dialogResult == 0;
     }
 

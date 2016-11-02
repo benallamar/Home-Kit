@@ -1,8 +1,11 @@
 package Connection;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.util.Date;
@@ -38,7 +41,8 @@ import org.bouncycastle.util.io.Streams;
 
 
 public class PGPMessage {
-    public static void signEncryptMessage(InputStream in, OutputStream out, PGPPublicKey publicKey, PGPPrivateKey secretKey, SecureRandom rand) throws Exception {
+    public static void signEncryptMessage(String text, OutputStream out, PGPPublicKey publicKey, PGPPrivateKey secretKey, SecureRandom rand) throws Exception {
+        InputStream in = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
         out = new ArmoredOutputStream(out);
 
         PGPEncryptedDataGenerator encryptedDataGenerator = new PGPEncryptedDataGenerator(new BcPGPDataEncryptorBuilder(PGPEncryptedData.AES_256).setWithIntegrityPacket(true).setSecureRandom(rand));
@@ -64,7 +68,6 @@ public class PGPMessage {
         signatureGenerator.generate().encode(compressedOut);
         compressedOut.close();
         encryptedDataGenerator.close();
-        out.close();
     }
 
     public static void decryptVerifyMessage(InputStream in, OutputStream out, PGPPrivateKey secretKey, PGPPublicKey publicKey) throws Exception {
@@ -137,3 +140,4 @@ public class PGPMessage {
         out.close();
     }
 }
+

@@ -1,13 +1,18 @@
 package Connection;
 
+import HomKit.Home;
 import HomeSecurityLayer.Certificat;
 import HomeSecurityLayer.PaireClesRSA;
 
 import java.io.*;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Date;
 
 import Console.JSONParser;
 
@@ -34,27 +39,39 @@ public class SocketHandler {
         setPorts(port, serverPort);
     }
 
-    public void write(PaireClesRSA key, boolean encrypt) throws IOException, ClassNotFoundException {
-        //response.debug();
+    public void write(PrivateKey key, boolean encrypt) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
+        if (Home.DEBUG_MODE)
+            response.debug();
         os = s.getOutputStream();
         oos = new ObjectOutputStream(os);
-        //We have to cypher the message before we send it.
-        //TODO: Add the PGP Protocol
         String encryptedMessage = JSONParser.serialize(response);
         if (encrypt) {
-            //String encryptedMessage = PGPMessage.signEncryptMessage();
+
+            //oos.writeObject(PGPMessage.encryptRSA(key, encryptedMessage.getBytes()));
+        } else {
+            oos.writeObject(encryptedMessage);
         }
-        oos.writeObject(encryptedMessage);
         oos.flush();
     }
 
-    public void read(PaireClesRSA key, boolean decrypt) throws IOException, ClassNotFoundException {
+    public void read(PublicKey key, boolean decrypt) throws IOException, ClassNotFoundException {
         is = s.getInputStream();
         ois = new ObjectInputStream(is);
         //We have to decypher the gotten message
-        //TODO : Add the PGP protocol here
-        String decryptedMessage = (String) ois.readObject();
-        request = JSONParser.deserialize(decryptedMessage);
+        String final_message = null;
+        if (decrypt) {
+            //final_message = PGPMessage.decrypt(key, (byte[]) ois.readObject());
+        } else {
+            final_message = (String) ois.readObject();
+        }
+        request = JSONParser.deserialize(final_message);
+        setHeader();
+    }
+
+    public void read() throws IOException, ClassNotFoundException {
+        is = s.getInputStream();
+        ois = new ObjectInputStream(is);
+        request = JSONParser.deserialize((String) ois.readObject());
     }
 
     public void close() throws IOException {
@@ -83,6 +100,14 @@ public class SocketHandler {
 
     public int getFromPort() {
         return request.getFromPort();
+    }
+
+    public void setFromPort(int port) {
+        response.setFromPort(port);
+    }
+
+    public void setToPort(int port) {
+        response.setToPort(port);
     }
 
     public String getSubject() {
@@ -152,5 +177,9 @@ public class SocketHandler {
 
     public void setSourceName(String s) {
         response.setSourceName(s);
+    }
+
+    public void setEmptyBody() {
+        response.setEmptyBody();
     }
 }
