@@ -7,13 +7,14 @@ import HomeSecurityLayer.PaireClesRSA;
 import java.io.*;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Date;
 
 import Console.JSONParser;
-import org.bouncycastle.openpgp.PGPPrivateKey;
-import org.bouncycastle.openpgp.PGPPublicKey;
 
 /**
  * Project Name : TL_crypto
@@ -38,26 +39,33 @@ public class SocketHandler {
         setPorts(port, serverPort);
     }
 
-    public void write(PaireClesRSA key, boolean encrypt) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, Exception {
+    public void write(PaireClesRSA key, boolean encrypt) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
         if (Home.DEBUG_MODE)
             response.debug();
+
         os = s.getOutputStream();
         oos = new ObjectOutputStream(os);
         String encryptedMessage = JSONParser.serialize(response);
         if (encrypt) {
-            PGPMessage.signEncryptMessage(is, os, (PGPPublicKey) key.pubKey(), (PGPPrivateKey) key.privKey(), new SecureRandom());
+
+            oos.writeObject(PGPMessage.encryptRSA(key, encryptedMessage.getBytes()));
+        } else {
+            oos.writeObject(encryptedMessage);
         }
-        oos.writeObject(encryptedMessage);
         oos.flush();
     }
 
-    public void read(PaireClesRSA key, boolean decrypt) throws IOException, ClassNotFoundException {
+    public void read(PublicKey key, boolean decrypt) throws IOException, ClassNotFoundException {
         is = s.getInputStream();
         ois = new ObjectInputStream(is);
         //We have to decypher the gotten message
-        //TODO : Add the PGP protocol here
-        String decryptedMessage = (String) ois.readObject();
-        request = JSONParser.deserialize(decryptedMessage);
+        String final_message = null;
+        if (decrypt) {
+            final_message = PGPMessage.decryptRSA(key, (byte[]) ois.readObject());
+        } else {
+            final_message = (String) ois.readObject();
+        }
+        request = JSONParser.deserialize(final_message);
     }
 
     public void close() throws IOException {

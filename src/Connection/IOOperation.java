@@ -34,11 +34,11 @@ public abstract class IOOperation extends Thread {
 
     // @over
     public void write(SocketHandler s, boolean encrypt) throws IOException, ClassNotFoundException {
-        s.write(maCle, encrypt);
+        s.write(maCle.privKey(), encrypt);
     }
 
     public void read(SocketHandler s, boolean decrypt) throws IOException, ClassNotFoundException {
-        s.read(maCle, decrypt);
+        s.read(getSession(s), decrypt);
     }
 
     public void print(String string) {
