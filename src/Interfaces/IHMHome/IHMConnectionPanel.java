@@ -54,9 +54,9 @@ public class IHMConnectionPanel extends JPanel {
                     y += height * 2;
                     x = ((int) (3 * width * Math.random())) % getWidth();
                 }
-                IHMHomeEquipement equi = new IHMHomeEquipement(equipment, x, y, width, height);
-                this.equipHomePanels.add(equi);
-                add(equi);
+                IHMHomeEquipement homeEquipment = new IHMHomeEquipement(equipment, x, y, width, height);
+                this.equipHomePanels.add(homeEquipment);
+                add(homeEquipment);
                 x = x + (int) (1.5 * width);
                 if (firstLoad) {
                     Home.loadPage.setValue(20 + index * 100 / size);
@@ -65,9 +65,10 @@ public class IHMConnectionPanel extends JPanel {
             }
             Home.newCo = false;
         } else {
-            for (IHMHomeEquipement equipement : equipHomePanels) {
-                add(equipement);
-            }
+
+            equipHomePanels.forEach(equipment -> {
+                add(equipment);
+            });
         }
     }
 

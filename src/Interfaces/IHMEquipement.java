@@ -50,7 +50,6 @@ public class IHMEquipement extends JFrame {
 
                 //We just give to the computer the next operation to do
                 equipement.setNextOperation(1, url.getPort(), url.getHost(), 0);
-                //And Yeah as usual we start a new thread
             } catch (MalformedURLException err) {
                 System.out.print(err.fillInStackTrace());
             }
@@ -59,12 +58,9 @@ public class IHMEquipement extends JFrame {
     }
 
     public void update() {
+        list1.removeAll();
         list1.setListData(equipement.CAArray());
-        list1.repaint();
-        panel1.add(list1);
         panel1.repaint();
-        revalidate();
-        repaint();
     }
 
     private void createUIComponents() {
