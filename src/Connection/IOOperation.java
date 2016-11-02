@@ -32,13 +32,17 @@ public abstract class IOOperation extends Thread {
     protected LinkedList<String> errors = new LinkedList<String>();
     boolean mode_server = true;
 
-    // @over
+    //Write the response to the server
     public void write(SocketHandler s, boolean encrypt) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
-        s.write(maCle.privKey(), encrypt);
+        s.write(maCle.privKey(), false);
     }
-
+    //Read the response from the server
     public void read(SocketHandler s, boolean decrypt) throws IOException, ClassNotFoundException {
-        s.read(getSession(s), decrypt);
+        if (decrypt) {
+            s.read(getSession(s), decrypt);
+        } else {
+            s.read();
+        }
     }
 
     public void print(String string) {

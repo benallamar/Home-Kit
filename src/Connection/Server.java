@@ -16,7 +16,7 @@ import java.util.LinkedList;
  * Created by marouanebenalla on 07/10/2016.
  */
 /*
-For server there are four main option:
+For server there are TREE main options:
     1- Connect.
     2- Connection Accepted.
     3- Do you trust the equipement with the given id.
@@ -41,11 +41,12 @@ public class Server extends Client {
         switchMode();
         while (true) {
             try {
-                System.out.print(name);
                 SocketHandler s = new SocketHandler(server.accept(), name);
                 //We get the information from the client
                 read(s, false);
                 //Open the sessions
+                s.debug();
+                //We define the combination
                 openSession(s);
                 //Set the response of our header
                 s.setHeader();
@@ -179,10 +180,10 @@ public class Server extends Client {
             case 3:
                 //Wait for the connection
                 establishConnection(s);
-                read(s, true);
+                read(s, false);
                 acceptConnection(s);
                 equipmentToSynchronizeWith(s);//We send the equipement to synchronize with
-                read(s, true);
+                read(s, false);
                 startSynchronization(s);
                 break;
             default:
@@ -200,16 +201,16 @@ public class Server extends Client {
             //We don't do any thing important, we just check hands and set Key informations
             write(s, false);
             //We get the empty response of the client
-            read(s, true);
+            read(s, false);
             generateCode(s, serverDisplay);
-            read(s, true);
+            read(s, false);
             if (checkCode(s)) {
                 serverDisplay.waitForConnection();
                 establishConnection(s);
-                read(s, true);
+                read(s, false);
                 acceptConnection(s);
                 equipmentToSynchronizeWith(s);//We send the equipement to synchronize with
-                read(s, true);
+                read(s, false);
                 startSynchronization(s);
                 serverDisplay.dispose();
             } else {

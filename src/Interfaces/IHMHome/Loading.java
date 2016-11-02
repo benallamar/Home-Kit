@@ -42,6 +42,7 @@ public class Loading extends JFrame {
         getRootPane().setWindowDecorationStyle(JRootPane.NONE);
         setSize(new Dimension(500, 600));
         setLocationRelativeTo(null);
+        setAlwaysOnTop(true);
         setVisible(true);
 
 

@@ -42,13 +42,12 @@ public class SocketHandler {
     public void write(PrivateKey key, boolean encrypt) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
         if (Home.DEBUG_MODE)
             response.debug();
-
         os = s.getOutputStream();
         oos = new ObjectOutputStream(os);
         String encryptedMessage = JSONParser.serialize(response);
         if (encrypt) {
 
-            oos.writeObject(PGPMessage.encryptRSA(key, encryptedMessage.getBytes()));
+            //oos.writeObject(PGPMessage.encryptRSA(key, encryptedMessage.getBytes()));
         } else {
             oos.writeObject(encryptedMessage);
         }
@@ -61,11 +60,18 @@ public class SocketHandler {
         //We have to decypher the gotten message
         String final_message = null;
         if (decrypt) {
-            final_message = PGPMessage.decryptRSA(key, (byte[]) ois.readObject());
+            //final_message = PGPMessage.decrypt(key, (byte[]) ois.readObject());
         } else {
             final_message = (String) ois.readObject();
         }
         request = JSONParser.deserialize(final_message);
+        setHeader();
+    }
+
+    public void read() throws IOException, ClassNotFoundException {
+        is = s.getInputStream();
+        ois = new ObjectInputStream(is);
+        request = JSONParser.deserialize((String) ois.readObject());
     }
 
     public void close() throws IOException {
@@ -94,6 +100,14 @@ public class SocketHandler {
 
     public int getFromPort() {
         return request.getFromPort();
+    }
+
+    public void setFromPort(int port) {
+        response.setFromPort(port);
+    }
+
+    public void setToPort(int port) {
+        response.setToPort(port);
     }
 
     public String getSubject() {

@@ -24,7 +24,6 @@ class IHMSecondMenu extends JMenuItem {
         //Add an action listner
         addActionListener(event -> {
             client.setNextOperation(1, server.getPort(), "localhost", 0);
-            new Thread(client).start();
         });
     }
 }

@@ -18,12 +18,17 @@ import java.util.LinkedList;
  * Created by marouanebenalla on 07/10/2016.
  */
 public class Client extends IOOperation implements Runnable {
+    /*
+    As an equipment could be a server and client and the same time, we precise that there are two definition:
+        Equipment Client: When the equipment plays client's role.
+        Equipement Server: When the equipment plays server's role
+     */
     private int serverPort = 0;
     private String host = "localhost";//We set the default host, this is used to connect with external equipement
     private LinkedList<Object[]> nextOperations = new LinkedList<Object[]>();
 
     public Client(String name, int port) {
-        maCle = new PaireClesRSA(1024);
+        maCle = new PaireClesRSA(2048);
         this.name = name;
         this.port = port;
     }
@@ -38,6 +43,7 @@ public class Client extends IOOperation implements Runnable {
             SocketHandler s = null;//Check the class SocketHandler for the purpose of the SocketHandler
             Object[] operation = nextOperations.pop();
             int option = (int) operation[0];
+            s = new SocketHandler((String) operation[2], port, (int) operation[1], name);
             switch (option) {
                 /*
                 The equipement has two functions as client, the first one is
@@ -53,19 +59,17 @@ public class Client extends IOOperation implements Runnable {
                  */
                 case 1:
                     //First one is connect with other Equipement(the equipement host:serverPost location)
-                    s = new SocketHandler((String) operation[2], port, (int) operation[1], name);
-                    //Displaying the connection
+                    //Display the frame
                     IHMConnexion serverDisplay = new IHMConnexion("Client : " + name, "" + serverPort, false);
                     connect(s, serverDisplay);
                     serverDisplay.dispose();
                     break;
                 case 2:
                     //We try to rebuild a trusted connection with other equipements
-                    s = new SocketHandler((String) operation[2], port, (int) operation[1], name);
                     synchronize(s, (int) operation[3]);
                     break;
                 default:
-                    //and
+                    //here we do nothing
             }
             //We finish by closing the connection
             close(s);
@@ -156,12 +160,13 @@ public class Client extends IOOperation implements Runnable {
     }
 
     /*
-    Connect method handle the first connection with a new equipement
+    Connect method handle the first connection with a new equipment.
+    So it starts by the hand-check to create some kind of sessio:@
      */
     public void connect(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, OperatorException, CertException, InterruptedException {
         //First we start by sending our key.
         s.setPublicKey(maCle);
-        //We display the frame, that we are waiting the response of the user
+        //We display the frame("Waiting for connection")
         serverDisplay.waitForConnection();
         //We have to check if is not connected.
         s.setOption(3);
@@ -173,10 +178,8 @@ public class Client extends IOOperation implements Runnable {
         openSession(s);
         //We send an empty message to the server
         write(s, true);
-        //Set the header of the response
-        s.setHeader();
         //We read the information
-        read(s, true);
+        read(s, false);
         //Handle the response
         if (serverDisplay.authenticate(s, this)) {
             //Get the request from the client
@@ -186,12 +189,12 @@ public class Client extends IOOperation implements Runnable {
             //Send the request
             write(s, true);
             //Set that we accept the connection
-            read(s, true);
+            read(s, false);
             //Set the display
             if (s.isSuccess()) {
                 acceptConnection(s);
                 establishConnection(s);//What do we have after that one ?
-                read(s, true);
+                read(s, false);
                 startSynchronization(s);
                 equipmentToSynchronizeWith(s);
                 //For display proposal
@@ -205,8 +208,12 @@ public class Client extends IOOperation implements Runnable {
         close(s);
     }
 
-
+    /*
+    After every new successful connection, the equipment client should be synchronized with all the other equipments
+    that the equipment server trust, so we should send this information to the equipment client
+     */
     public void equipmentToSynchronizeWith(SocketHandler s) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
+
         s.setNewBody();
         int key = 1;
         for (int portEqui : CA.keySet()) {
@@ -247,7 +254,7 @@ public class Client extends IOOperation implements Runnable {
         //We have to check if is not connected.
         ack(s);
         //Get the response from the server
-        read(s, true);
+        read(s, false);
         //Create the session for that user
         openSession(s);
         //Set the header of the response
@@ -256,7 +263,7 @@ public class Client extends IOOperation implements Runnable {
         if (s.isSuccess()) {
             acceptConnection(s);
             establishConnection(s);
-            read(s, true);
+            read(s, false);
             startSynchronization(s);
             equipmentToSynchronizeWith(s);
         }

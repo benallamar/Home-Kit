@@ -88,11 +88,11 @@ public class IHMConnectionPanel extends JPanel {
                     equipement.start();
                 }
                 if (x + width > getWidth()) {
-                    y += height * (1 + Math.random());
+                    y += height * 2;
                     x = (x + width) % getWidth();
                 }
                 if (x + width == getWidth()) {
-                    y += height * (1 + Math.random());
+                    y += height * 2;
                     x = ((int) (3 * width * Math.random())) % getWidth();
                 }
                 IHMHomeEquipement equi = new IHMHomeEquipement(equipement, equis, x, y, width, height);
