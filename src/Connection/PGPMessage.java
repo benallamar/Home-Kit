@@ -1,16 +1,31 @@
 package Connection;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.SecureRandom;
-import java.security.SignatureException;
+import java.security.*;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 import java.util.Iterator;
 
-import org.bouncycastle.bcpg.ArmoredInputStream;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
-import org.bouncycastle.bcpg.HashAlgorithmTags;
+import org.bouncycastle.crypto.AsymmetricBlockCipher;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.encodings.PKCS1Encoding;
+import org.bouncycastle.crypto.engines.RSABlindedEngine;
+import org.bouncycastle.crypto.engines.RSAEngine;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
+import org.bouncycastle.crypto.util.PublicKeyFactory;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
 import org.bouncycastle.openpgp.PGPEncryptedData;
@@ -20,120 +35,101 @@ import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPLiteralData;
 import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
 import org.bouncycastle.openpgp.PGPObjectFactory;
-import org.bouncycastle.openpgp.PGPOnePassSignature;
-import org.bouncycastle.openpgp.PGPOnePassSignatureList;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPPublicKeyEncryptedData;
-import org.bouncycastle.openpgp.PGPSignature;
-import org.bouncycastle.openpgp.PGPSignatureGenerator;
-import org.bouncycastle.openpgp.PGPSignatureList;
-import org.bouncycastle.openpgp.operator.PGPContentSignerBuilder;
-import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
-import org.bouncycastle.openpgp.operator.bc.BcPGPDataEncryptorBuilder;
-import org.bouncycastle.openpgp.operator.bc.BcPublicKeyKeyEncryptionMethodGenerator;
-import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
-import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyDataDecryptorFactoryBuilder;
-import org.bouncycastle.util.io.Streams;
+import org.bouncycastle.openpgp.PGPPublicKeyRing;
+import org.bouncycastle.openpgp.PGPPublicKeyRingCollection;
+import org.bouncycastle.openpgp.PGPSecretKey;
+import org.bouncycastle.openpgp.PGPSecretKeyRingCollection;
+import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.openpgp.operator.jcajce.JcePBEKeyEncryptionMethodGenerator;
+import org.bouncycastle.openpgp.operator.jcajce.JcePGPDataEncryptorBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyKeyEncryptionMethodGenerator;
 
 
 public class PGPMessage {
-    public static void signEncryptMessage(InputStream in, OutputStream out, PGPPublicKey publicKey, PGPPrivateKey secretKey, SecureRandom rand) throws Exception {
-        out = new ArmoredOutputStream(out);
+    public static String decryptRSA(PublicKey key, byte[] data) {
+        //
+        // Get an RSA Cipher instance
+        //
 
-        PGPEncryptedDataGenerator encryptedDataGenerator = new PGPEncryptedDataGenerator(new BcPGPDataEncryptorBuilder(PGPEncryptedData.AES_256).setWithIntegrityPacket(true).setSecureRandom(rand));
-        encryptedDataGenerator.addMethod(new BcPublicKeyKeyEncryptionMethodGenerator(publicKey));
+        //Cipher rsa = null;
 
-        OutputStream compressedOut = new PGPCompressedDataGenerator(PGPCompressedData.ZIP).open(encryptedDataGenerator.open(out, 4096), new byte[4096]);
+        try {
+      /* The following commented code can be used the BouncyCastle
+       * JCE provider signature is intact, which is not the
+       * case when BC has been repackaged using jarjar
+      rsa = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
+      rsa.init (Cipher.DECRYPT_MODE, key, CryptoHelper.sr);
+      return rsa.doFinal(data);
+      */
 
-        PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(((PGPContentSignerBuilder) new BcPGPContentSignerBuilder(publicKey.getAlgorithm(), HashAlgorithmTags.SHA512)));
-        signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, secretKey);
-        signatureGenerator.generateOnePassVersion(true).encode(compressedOut);
+            String plainText = null;
+            AsymmetricBlockCipher eng = new RSAEngine();
 
-        OutputStream finalOut = new PGPLiteralDataGenerator().open(compressedOut, PGPLiteralData.BINARY, "", new Date(), new byte[4096]);
+            eng = new PKCS1Encoding(eng);
+            SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(key.getEncoded());
+            eng.init(false, (AsymmetricKeyParameter) PublicKeyFactory.createKey(subPubKeyInfo));
+            byte[] plainByte = eng.processBlock(data, 0, data.length);
+            plainText = new String(plainByte);
 
-        byte[] buf = new byte[4096];
-        int len;
-        while ((len = in.read(buf)) > 0) {
-            finalOut.write(buf, 0, len);
-            signatureGenerator.update(buf, 0, len);
+            return plainText;
+
+        } catch (InvalidCipherTextException icte) {
+            System.out.println(icte.fillInStackTrace());
+            return null;
+        } catch (IOException icte) {
+            System.out.println(icte.fillInStackTrace());
+            return null;
         }
-
-        finalOut.close();
-        in.close();
-        signatureGenerator.generate().encode(compressedOut);
-        compressedOut.close();
-        encryptedDataGenerator.close();
-        out.close();
     }
 
-    public static void decryptVerifyMessage(InputStream in, OutputStream out, PGPPrivateKey secretKey, PGPPublicKey publicKey) throws Exception {
-        in = new ArmoredInputStream(in);
+    public static byte[] encryptRSA(Key key, byte[] data) {
+        //
+        // Get an RSA Cipher instance
+        //
+        //Cipher rsa = null;
 
-        PGPObjectFactory pgpF = new PGPObjectFactory(in, null);
-        PGPEncryptedDataList enc = (PGPEncryptedDataList) pgpF.nextObject();
-
-        PGPObjectFactory plainFact = new PGPObjectFactory(((PGPPublicKeyEncryptedData) enc.getEncryptedDataObjects().next()).getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider("BC").build(secretKey)), null);
-
-        Object message = null;
-
-        PGPOnePassSignatureList onePassSignatureList = null;
-        PGPSignatureList signatureList = null;
-        PGPCompressedData compressedData = null;
-
-        message = plainFact.nextObject();
-        ByteArrayOutputStream actualOutput = new ByteArrayOutputStream();
-
-        while (message != null) {
-            System.out.println(message.toString());
-            if (message instanceof PGPCompressedData) {
-                compressedData = (PGPCompressedData) message;
-                plainFact = new PGPObjectFactory(compressedData.getDataStream(), null);
-                message = plainFact.nextObject();
-                System.out.println(message.toString());
-            }
-
-            if (message instanceof PGPLiteralData) {
-                Streams.pipeAll(((PGPLiteralData) message).getInputStream(), actualOutput);
-            } else if (message instanceof PGPOnePassSignatureList) {
-                onePassSignatureList = (PGPOnePassSignatureList) message;
-            } else if (message instanceof PGPSignatureList) {
-                signatureList = (PGPSignatureList) message;
+        try {
+      /* The following commented code can be used the BouncyCastle
+       * JCE provider signature is intact, which is not the
+       * case when BC has been repackaged using jarjar
+      rsa = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
+      rsa.init (Cipher.ENCRYPT_MODE, key, CryptoHelper.sr);
+      return rsa.doFinal(data);
+      */
+            AsymmetricBlockCipher c = new PKCS1Encoding(new RSABlindedEngine());
+            if (key instanceof RSAPublicKey) {
+                c.init(true, new RSAKeyParameters(true, ((RSAPublicKey) key).getModulus(), ((RSAPublicKey) key).getPublicExponent()));
+            } else if (key instanceof RSAPrivateKey) {
+                c.init(true, new RSAKeyParameters(true, ((RSAPrivateKey) key).getModulus(), ((RSAPrivateKey) key).getPrivateExponent()));
             } else {
-                throw new PGPException("message unknown message type.");
-            }
-            message = plainFact.nextObject();
-        }
-        actualOutput.close();
-        byte[] output = actualOutput.toByteArray();
-        if (onePassSignatureList == null || signatureList == null) {
-            throw new PGPException("Poor PGP. Signatures not found.");
-        } else {
-
-            for (int i = 0; i < onePassSignatureList.size(); i++) {
-                PGPOnePassSignature ops = onePassSignatureList.get(0);
-                System.out.println("verifier : " + ops.getKeyID());
-                if (publicKey != null) {
-                    ops.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), publicKey);
-                    ops.update(output);
-                    PGPSignature signature = signatureList.get(i);
-                    if (ops.verify(signature)) {
-                        Iterator<?> userIds = publicKey.getUserIDs();
-                        while (userIds.hasNext()) {
-                            String userId = (String) userIds.next();
-                            System.out.println("Signed by " + userId);
-                        }
-                        System.out.println("Signature verified");
-                    } else {
-                        throw new SignatureException("Signature verification failed");
-                    }
-                }
+                return null;
             }
 
-        }
+            int insize = c.getInputBlockSize();
 
-        out.write(output);
-        out.flush();
-        out.close();
+            int offset = 0;
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            while (offset < data.length) {
+                int len = Math.min(insize, data.length - offset);
+                baos.write(c.processBlock(data, offset, len));
+                offset += len;
+            }
+
+            return baos.toByteArray();
+
+        } catch (InvalidCipherTextException icte) {
+            System.out.println(icte.fillInStackTrace());
+            return null;
+        } catch (IOException ioe) {
+            System.out.println(ioe.fillInStackTrace());
+
+            return null;
+        }
     }
+
 }
