@@ -151,7 +151,7 @@ public class Server extends Client {
         return s.isSuccess();
     }
 
-    public String[] generateCode(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException {
+    public String[] generateCode(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
         //Generate the code and the token
         String[] oauth2 = genKeyToken(maCle.pubKey());
 

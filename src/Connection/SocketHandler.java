@@ -39,7 +39,7 @@ public class SocketHandler {
         setPorts(port, serverPort);
     }
 
-    public void write(PaireClesRSA key, boolean encrypt) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public void write(PrivateKey key, boolean encrypt) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
         if (Home.DEBUG_MODE)
             response.debug();
 

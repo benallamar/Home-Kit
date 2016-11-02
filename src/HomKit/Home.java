@@ -27,7 +27,7 @@ public class Home extends Thread implements Runnable {
     private static IHMHome homeInterface = null;
     private boolean check_new_equi = false;
     final static int TIME_CHECK = 5000; //Check the new equipements every TIME_CHECK Seconds
-    public static boolean DEBUG_MODE = false;
+    public static boolean DEBUG_MODE = true;
     public static Loading loadPage = null;
     public static boolean newCo = false;
 

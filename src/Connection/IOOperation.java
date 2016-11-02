@@ -33,7 +33,7 @@ public abstract class IOOperation extends Thread {
     boolean mode_server = true;
 
     // @over
-    public void write(SocketHandler s, boolean encrypt) throws IOException, ClassNotFoundException {
+    public void write(SocketHandler s, boolean encrypt) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
         s.write(maCle.privKey(), encrypt);
     }
 
@@ -74,7 +74,7 @@ public abstract class IOOperation extends Thread {
         return sessions.get(s.getFromPort());
     }
 
-    public void unauthorized(SocketHandler s) throws IOException, ClassNotFoundException {
+    public void unauthorized(SocketHandler s) throws IOException, ClassNotFoundException, InvalidKeySpecException, NoSuchAlgorithmException {
         //set the option that you have and error and close the connection
         s.response.setNewBody();
         s.response.setFailed();

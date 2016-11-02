@@ -2,34 +2,15 @@ package Connection;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-<<<<<<< HEAD
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-=======
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
->>>>>>> 31bfc952705b62fcf2f472aabc9ff06842c32cee
-import java.util.Date;
-import java.util.Iterator;
+
 
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.bcpg.ArmoredOutputStream;
-<<<<<<< HEAD
-import org.bouncycastle.bcpg.HashAlgorithmTags;
-=======
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
-import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
@@ -37,29 +18,6 @@ import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
->>>>>>> 31bfc952705b62fcf2f472aabc9ff06842c32cee
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openpgp.PGPCompressedData;
-import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
-import org.bouncycastle.openpgp.PGPEncryptedData;
-import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
-import org.bouncycastle.openpgp.PGPEncryptedDataList;
-import org.bouncycastle.openpgp.PGPException;
-import org.bouncycastle.openpgp.PGPLiteralData;
-import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
-import org.bouncycastle.openpgp.PGPObjectFactory;
-import org.bouncycastle.openpgp.PGPPrivateKey;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPPublicKeyEncryptedData;
-import org.bouncycastle.openpgp.PGPPublicKeyRing;
-import org.bouncycastle.openpgp.PGPPublicKeyRingCollection;
-import org.bouncycastle.openpgp.PGPSecretKey;
-import org.bouncycastle.openpgp.PGPSecretKeyRingCollection;
-import org.bouncycastle.openpgp.PGPUtil;
-import org.bouncycastle.openpgp.operator.jcajce.JcePBEKeyEncryptionMethodGenerator;
-import org.bouncycastle.openpgp.operator.jcajce.JcePGPDataEncryptorBuilder;
-import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyKeyEncryptionMethodGenerator;
-
 
 public class PGPMessage {
     public static String decryptRSA(PublicKey key, byte[] data) {

@@ -133,7 +133,7 @@ public class Client extends IOOperation implements Runnable {
     This method plays the role of 'ping', it has as purpose, to check if the
     other equipment is connected, and open a session with it.
      */
-    public void ack(SocketHandler s) throws IOException, ClassNotFoundException {
+    public void ack(SocketHandler s) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
         //We reset the body of our response to the server
         s.setNewBody();
         //We finish by sending the response to the server
@@ -206,7 +206,7 @@ public class Client extends IOOperation implements Runnable {
     }
 
 
-    public void equipmentToSynchronizeWith(SocketHandler s) throws IOException, ClassNotFoundException {
+    public void equipmentToSynchronizeWith(SocketHandler s) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException {
         s.setNewBody();
         int key = 1;
         for (int portEqui : CA.keySet()) {
@@ -265,7 +265,14 @@ public class Client extends IOOperation implements Runnable {
     }
 
     public void setNextOperation(int option, int desPort, String host, int sourcePort) {
-        //We fill the pipe of instruction to do
+        if (Home.DEBUG_MODE)
+            switch (option) {
+                case 1:
+                    print("Asking new connection");
+                    break;
+                case 2:
+                    print("Asking for synchronization");
+            }
         nextOperations.push(new Object[]{option, desPort, host, sourcePort});
         //And yeah, we run a thread for every instruction
         new Thread(this).start();
