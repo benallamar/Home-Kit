@@ -30,19 +30,21 @@ public class IHMConnectionPanel extends JPanel {
         label2.setText("");
         label2.setBounds(0, 0, 150, 150);
         add(label2);
-        initiate();
+        initiate(true);
     }
 
-    public void initiate() {
+    public void initiate(boolean firstLoad) {
         int width = (int) ((getWidth() / 5));
-        int height = (int) ((getHeight() / 5) * 0.6);
+        int height = (int) ((getHeight() / 5) * 0.5);
         int x = 160;
-        int y = 160;
+        int y = 120;
+        int index = 0;
         if (Home.newCo) {
+            int size = Home.equipements.size();
             equipHomePanels = new HashSet<IHMHomeEquipement>();
-            for (Equipement equipement : Home.equipements) {
-                if (!equipement.isAlive() || equipement.isDaemon()) {
-                    equipement.start();
+            for (Equipement equipment : Home.equipements) {
+                if (!equipment.isAlive() || equipment.isDaemon()) {
+                    equipment.start();
                 }
                 if (x + width > getWidth()) {
                     y += height * 2;
@@ -52,10 +54,14 @@ public class IHMConnectionPanel extends JPanel {
                     y += height * 2;
                     x = ((int) (3 * width * Math.random())) % getWidth();
                 }
-                IHMHomeEquipement equi = new IHMHomeEquipement(equipement, x, y, width, height);
+                IHMHomeEquipement equi = new IHMHomeEquipement(equipment, x, y, width, height);
                 this.equipHomePanels.add(equi);
                 add(equi);
                 x = x + (int) (1.5 * width);
+                if (firstLoad) {
+                    Home.loadPage.setValue(20 + index * 100 / size);
+                    index++;
+                }
             }
             Home.newCo = false;
         } else {
@@ -73,7 +79,7 @@ public class IHMConnectionPanel extends JPanel {
         label2.setText("");
         label2.setBounds(0, 0, 150, 150);
         add(label2);
-        initiate();
+        initiate(false);
         revalidate();
         repaint();
     }
