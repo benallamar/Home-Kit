@@ -9,7 +9,6 @@ import com.google.gson.stream.JsonReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -20,12 +19,12 @@ public class JSONParser {
     //Set the directory of the comp data
     private static final String COMP_DIRECTORY = "src/data/CompData/";
 
-    public static void genrateEquipement(String compName, HashSet<Equipement> equipements) throws FileNotFoundException, IOException {
+    public static void genrateEquipement(String compName, HashSet<Equipement> equipements) throws IOException {
         JsonReader json_file = new JsonReader(new FileReader(COMP_DIRECTORY + compName));
         HashMap<String, Object> object = new Gson().fromJson(json_file, HashMap.class);
         String name = (String) object.get("name");
         int port = ((Double) object.get("port")).intValue();
-        if (!Equipement.equiExist(name, port, equipements)) {
+        if (!Equipement.equiExist(port, equipements)) {
             System.out.println("New Equipement has been detected... Name: " + name + " Port:" + port);
             Home.newCo = true;
             equipements.add(new Equipement(name, port));

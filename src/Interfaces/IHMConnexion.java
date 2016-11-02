@@ -36,7 +36,7 @@ public class IHMConnexion extends JFrame {
     }
 
     public boolean authenticate(SocketHandler s, Client client) throws InterruptedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        ImageIcon icon = new ImageIcon("src/icons/logo.png");
+        ImageIcon icon = new ImageIcon("src/data/icons/logo.png");
         String message = IOOperation.genKeyMessage(s.getPubKey(), (String) s.getKey("token"), (String) s.getKey("code"));
         int dialogButton = JOptionPane.YES_NO_OPTION;
         int dialogResult = JOptionPane.showConfirmDialog(this, "Do you see this: \n " + message + "\n on your system panel ?", " Avoid Man In The Middle Attack", dialogButton, JOptionPane.INFORMATION_MESSAGE, icon);
@@ -44,7 +44,7 @@ public class IHMConnexion extends JFrame {
     }
 
     public boolean doYouAccept(String equiName) {
-        ImageIcon icon = new ImageIcon("src/icons/logo.png");
+        ImageIcon icon = new ImageIcon("src/data/icons/logo.png");
         int dialogButton = JOptionPane.YES_NO_OPTION;
         int dialogResult = JOptionPane.showConfirmDialog(this, "The device : " + equiName.toUpperCase() + " is not connected \n Do you want to accept the connection ?", "Connection Request", dialogButton,JOptionPane.INFORMATION_MESSAGE, icon);
         return dialogResult == 0;

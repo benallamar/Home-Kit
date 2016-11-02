@@ -1,5 +1,6 @@
 package Connection;
 
+import HomKit.Home;
 import HomeSecurityLayer.Certificat;
 import HomeSecurityLayer.PaireClesRSA;
 
@@ -7,9 +8,12 @@ import java.io.*;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 
 import Console.JSONParser;
+import org.bouncycastle.openpgp.PGPPrivateKey;
+import org.bouncycastle.openpgp.PGPPublicKey;
 
 /**
  * Project Name : TL_crypto
@@ -34,15 +38,14 @@ public class SocketHandler {
         setPorts(port, serverPort);
     }
 
-    public void write(PaireClesRSA key, boolean encrypt) throws IOException, ClassNotFoundException {
-        //response.debug();
+    public void write(PaireClesRSA key, boolean encrypt) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, Exception {
+        if (Home.DEBUG_MODE)
+            response.debug();
         os = s.getOutputStream();
         oos = new ObjectOutputStream(os);
-        //We have to cypher the message before we send it.
-        //TODO: Add the PGP Protocol
         String encryptedMessage = JSONParser.serialize(response);
         if (encrypt) {
-            //String encryptedMessage = PGPMessage.signEncryptMessage();
+            PGPMessage.signEncryptMessage(is, os, (PGPPublicKey) key.pubKey(), (PGPPrivateKey) key.privKey(), new SecureRandom());
         }
         oos.writeObject(encryptedMessage);
         oos.flush();

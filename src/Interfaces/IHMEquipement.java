@@ -1,16 +1,10 @@
 package Interfaces;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Collections;
 
 import Component.Equipement;
 
@@ -27,13 +21,6 @@ public class IHMEquipement extends JFrame {
     private JTextArea textArea1;
     private Equipement equipement;
 
-    public static void main(String[] arg) {
-        Equipement equi = new Equipement("localhost", 2000);
-        equi.start();
-        IHMEquipement equipement = new IHMEquipement(equi);
-
-    }
-
     public IHMEquipement(Equipement equipement) {
         this.equipement = equipement;
         $$$setupUI$$$();
@@ -43,31 +30,31 @@ public class IHMEquipement extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         setVisible(true);
-        list1.addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                try {
-                    System.out.println(list1.getSelectedIndex());
-                    textPane2.setText(equipement.getCertCA(list1.getSelectedIndex()));
-                } catch (IOException er) {
-                }
+        //Display a certificate after has been chosen by the user
+        list1.addListSelectionListener((event) -> {
+            try {
+                textPane2.setText(equipement.getCertCA(list1.getSelectedIndex()));
+            } catch (IOException er) {
             }
         });
-        connectButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                try {
-                    URL url = new URL("http://" + textField2.getText());
-                    equipement.setClientMode();
-                    equipement.setOption(1);
-                    equipement.setHost(url.getHost());
-                    equipement.setServerPort(url.getPort());
-                    new Thread(equipement).start();
-                } catch (MalformedURLException err) {
-                    System.out.print(err.fillInStackTrace());
-                }
+        //Set the connection button
+        connectButton.addActionListener(event -> {
+            try {
+                /*
+                Here we parse the link and we try to connect with the given host.
+                HTTP Protocol has nothing to do with the projet, I have just added
+                because we need to the use URL to facilitate our work, and URL class
+                need to a real protocl(so we could replace it with other protocol SO, VNC...
+                 */
+                URL url = new URL("http://" + textField2.getText());
 
+                //We just give to the computer the next operation to do
+                equipement.setNextOperation(1, url.getPort(), url.getHost(), 0);
+                //And Yeah as usual we start a new thread
+            } catch (MalformedURLException err) {
+                System.out.print(err.fillInStackTrace());
             }
+
         });
     }
 
@@ -104,21 +91,21 @@ public class IHMEquipement extends JFrame {
         panel1.add(tabbedPane2, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-        tabbedPane2.addTab("General Information", new ImageIcon(getClass().getResource("/icons/commerce.png")), panel2);
+        tabbedPane2.addTab("General Information", new ImageIcon(getClass().getResource("/data/icons/commerce.png")), panel2);
         textArea1.setEditable(false);
         textArea1.setEnabled(false);
         panel2.add(textArea1, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(100, 50), null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         panel3.setInheritsPopupMenu(true);
-        tabbedPane2.addTab("Certificat Autorities", new ImageIcon(getClass().getResource("/icons/certificate.png")), panel3);
+        tabbedPane2.addTab("Certificat Autorities", new ImageIcon(getClass().getResource("/data/icons/certificate.png")), panel3);
         textPane2 = new JTextPane();
         textPane2.setEditable(false);
         panel3.add(textPane2, new com.intellij.uiDesigner.core.GridConstraints(0, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
         panel3.add(list1, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(3, 5, new Insets(0, 0, 0, 0), -1, -1));
-        tabbedPane2.addTab("External Hosts", new ImageIcon(getClass().getResource("/icons/external-link-symbol.png")), panel4);
+        tabbedPane2.addTab("External Hosts", new ImageIcon(getClass().getResource("/data/icons/external-link-symbol.png")), panel4);
         final com.intellij.uiDesigner.core.Spacer spacer1 = new com.intellij.uiDesigner.core.Spacer();
         panel4.add(spacer1, new com.intellij.uiDesigner.core.GridConstraints(0, 1, 1, 2, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final com.intellij.uiDesigner.core.Spacer spacer2 = new com.intellij.uiDesigner.core.Spacer();
@@ -131,7 +118,7 @@ public class IHMEquipement extends JFrame {
         final com.intellij.uiDesigner.core.Spacer spacer3 = new com.intellij.uiDesigner.core.Spacer();
         panel4.add(spacer3, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         connectButton = new JButton();
-        connectButton.setIcon(new ImageIcon(getClass().getResource("/icons/transfer.png")));
+        connectButton.setIcon(new ImageIcon(getClass().getResource("/data/icons/transfer.png")));
         connectButton.setText("Connect");
         panel4.add(connectButton, new com.intellij.uiDesigner.core.GridConstraints(2, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final com.intellij.uiDesigner.core.Spacer spacer4 = new com.intellij.uiDesigner.core.Spacer();

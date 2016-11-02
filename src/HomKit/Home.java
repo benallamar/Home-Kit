@@ -27,12 +27,13 @@ public class Home extends Thread implements Runnable {
     private static IHMHome homeInterface = null;
     private boolean check_new_equi = false;
     final static int TIME_CHECK = 5000; //Check the new equipements every TIME_CHECK Seconds
+    public static boolean DEBUG_MODE = false;
     public static Loading loadPage = null;
     public static boolean newCo = false;
 
     public void checkComponent() {
         try {
-            List<File> filesInFolder = Files.walk(Paths.get("/Users/marouanebenalla/Documents/workspace/sis/TL_Crypto/src/data/CompData/"))
+            List<File> filesInFolder = Files.walk(Paths.get("src/data/CompData/"))
                     .filter(Files::isRegularFile)
                     .map(Path::toFile)
                     .collect(Collectors.toList());

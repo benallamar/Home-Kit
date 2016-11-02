@@ -4,7 +4,6 @@ import Component.Equipement;
 import HomKit.Home;
 
 import javax.swing.*;
-import javax.swing.text.html.HTMLDocument;
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.util.HashMap;
@@ -25,7 +24,7 @@ public class IHMConnectionPanel extends JPanel {
         setSize(new Dimension(1000, 600));
         final JLabel label2 = new JLabel();
         label2.setBackground(new Color(-983553));
-        label2.setIcon(new ImageIcon(getClass().getResource("/icons/logo.png")));
+        label2.setIcon(new ImageIcon(getClass().getResource("/data/icons/logo.png")));
         label2.setText("");
         label2.setBounds(0, 0, 150, 150);
         add(label2);
@@ -72,7 +71,7 @@ public class IHMConnectionPanel extends JPanel {
         removeAll();
         final JLabel label2 = new JLabel();
         label2.setBackground(new Color(-983553));
-        label2.setIcon(new ImageIcon(getClass().getResource("/icons/logo-big.png")));
+        label2.setIcon(new ImageIcon(getClass().getResource("/data/icons/logo-big.png")));
         label2.setText("");
         label2.setBounds(0, 0, 150, 150);
         add(label2);

@@ -29,9 +29,9 @@ public class IHMHome extends JFrame {
         setContentPane(contentPane);
         setSize(new Dimension(contentPane.getWidth(), contentPane.getHeight()));
         setLocationRelativeTo(null);
-        //setResizable(false);
         Home.loadPage.dispose();
-        setFocusable(true);
+        requestFocus();
+        setResizable(false);
         setVisible(true);
 
     }

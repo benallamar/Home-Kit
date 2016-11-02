@@ -1,5 +1,6 @@
 package Connection;
 
+import HomKit.Home;
 import Interfaces.IHMConnexion;
 import org.bouncycastle.cert.CertException;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -35,7 +36,8 @@ public class Server extends Client {
     }
 
     public void runServer() {
-        print("server on port : " + port + " is runing");
+        if (Home.DEBUG_MODE)
+            print("server on port : " + port + " is runing");
         switchMode();
         while (true) {
             try {
@@ -193,6 +195,12 @@ public class Server extends Client {
     public void notConnectedEquipement(SocketHandler s, IHMConnexion serverDisplay) throws IOException, ClassNotFoundException, CertException, OperatorCreationException, InvalidKeySpecException, NoSuchAlgorithmException {
 
         if (serverDisplay.doYouAccept(s.getSourceName())) {
+            //We have accept the connection
+            s.setPublicKey(maCle);
+            //We don't do any thing important, we just check hands and set Key informations
+            write(s, false);
+            //We get the empty response of the client
+            read(s, true);
             generateCode(s, serverDisplay);
             read(s, true);
             if (checkCode(s)) {

@@ -37,6 +37,7 @@ public class Loading extends JFrame {
         $$$setupUI$$$();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setContentPane(panel1);
+        setContentPane(panel1);
         setUndecorated(true);
         getRootPane().setWindowDecorationStyle(JRootPane.NONE);
         setSize(new Dimension(500, 600));
@@ -70,7 +71,7 @@ public class Loading extends JFrame {
         thisSoftwareHasBeenTextPane.setEnabled(false);
         thisSoftwareHasBeenTextPane.setFont(new Font("Ayuthaya", Font.PLAIN, 10));
         thisSoftwareHasBeenTextPane.setForeground(new Color(-12040120));
-        thisSoftwareHasBeenTextPane.setText("This software has been developed under MIT Licence, so you have the right to update it, change it or remove any thing you find useless but don't forget the persons who speends hours in developing it.\n\n");
+        thisSoftwareHasBeenTextPane.setText("This software has been developed under MIT Licence, so you have the right to update it, change it or remove any thing you find useless but don't forget the persons who speend hours in developing it.\nThis project has been created for educational purpose, if you need any further information about it just contact us.\n");
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
@@ -122,7 +123,7 @@ public class Loading extends JFrame {
         panel1.add(label1, gbc);
         final JLabel label2 = new JLabel();
         label2.setBackground(new Color(-983553));
-        label2.setIcon(new ImageIcon(getClass().getResource("/icons/SEO-Connected-pic.png")));
+        label2.setIcon(new ImageIcon(getClass().getResource("/data/icons/SEO-Connected-pic.png")));
         label2.setText("");
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
