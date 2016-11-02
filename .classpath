@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Users/Jean-loup/workspace/TL_Crypto/bcpg-jdk15on-155.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Jean-loup/workspace/TL_Crypto/bcprov-jdk15on-155.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Jean-loup/workspace/TL_Crypto/jce-jdk13-155(1).jar"/>
-	<classpathentry kind="lib" path="C:/Users/Jean-loup/workspace/TL_Crypto/artifacts.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Jean-loup/workspace/TL_Crypto/content.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/docs1"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/pkixdocs1"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/bcpg-jdk15on-153"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/com.google.code.gson:gson:2.7"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/bcpg-jdk15on-155"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/bcprov-jdk15on-155"/>
+	<classpathentry kind="output" path="out/production/TL_Crypto"/>
 </classpath>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eclipse-userlibraries>
+  <library name="docs1" />
+  <library name="bcpg-jdk15on-153" />
+  <library name="bcpg-jdk15on-155">
+    <archive path="/Users/marouanebenalla/Documents/workspace/sis/TL_Crypto/lib/bcpg-jdk15on-155.jar" />
+  </library>
+  <library name="bcprov-jdk15on-155">
+    <archive path="/Users/marouanebenalla/Downloads/bcprov-jdk15on-155.jar" />
+    <archive path="/Users/marouanebenalla/Downloads/bcpkix-jdk15on-155.jar" />
+  </library>
+  <library name="com.google.code.gson:gson:2.7">
+    <archive path="/Users/marouanebenalla/.m2/repository/com/google/code/gson/gson/2.7/gson-2.7.jar" />
+  </library>
+  <library name="pgdocs1" />
+  <library name="pkixdocs1" />
+</eclipse-userlibraries>
+

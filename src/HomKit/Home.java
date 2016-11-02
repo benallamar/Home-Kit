@@ -34,7 +34,6 @@ public class Home extends Thread implements Runnable {
                     .filter(Files::isRegularFile)
                     .map(Path::toFile)
                     .collect(Collectors.toList());
-            int size = filesInFolder.size();
             for (File file : filesInFolder) {
                 //We check if we don't already have this equipements
                 JSONParser.genrateEquipement(file.getName(), equipements);
