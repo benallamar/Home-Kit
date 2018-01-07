@@ -21,7 +21,7 @@ public class Home extends Thread implements Runnable {
   private HashSet<Equipement> equipements = new HashSet<Equipement>();
   private static IHMHome homeInterface = null;
   private boolean check_new_equi = false;
-  final static int TIME_CHECK = 5000; //Check the new equipements every TIME_CHECK Seconds
+  final static int TIME_CHECK = 5000; //Check new equipments every TIME_CHECK seconds
   public static Loading loadPage = null;
   public static boolean newCo = false;
 

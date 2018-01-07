@@ -17,7 +17,6 @@ public class FilerParser {
 
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file_path));
-            System.out.println(reader.readLine());
         } catch (FileNotFoundException x) {
             System.err.format("FileNotFoundException: %s%n", x);
         } catch (IOException x) {
