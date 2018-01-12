@@ -1,7 +1,7 @@
-package Interfaces.IHMHome;
+package ui.IHMHome;
 
-import Component.Equipement;
-import HomKit.Home;
+import component.Equipement;
+import homekit.Home;
 
 import java.awt.*;
 import java.util.HashSet;

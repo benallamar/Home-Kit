@@ -1,4 +1,4 @@
-package Interfaces.IHMHome;
+package ui.IHMHome;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,15 +1,13 @@
-package Connection;
+package connection;
 
 
-import HomeSecurityLayer.Certificat;
-import HomeSecurityLayer.PaireClesRSA;
-import Interfaces.IHMConnexion;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.LinkedList;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.OperatorException;
+import security.Certificat;
+import security.PaireClesRSA;
+import ui.IHMConnexion;
 
 /**
  * Created by marouanebenalla on 07/10/2016.
@@ -18,7 +16,6 @@ public class Client extends IOOperation implements Runnable {
 
   private int serverPort = 0;
   private int option = 0;
-  private int parentPort = 0;
   private String host = "localhost";
   private LinkedList<int[]> equiToSynWith = new LinkedList<int[]>();
 
@@ -33,9 +30,7 @@ public class Client extends IOOperation implements Runnable {
   }
 
   public void runClient() {
-    //Display the message of waiting connection
     try {
-      //Initiate the socket
       SocketHandler s = null;
       switch (option) {
         case 1:
@@ -52,68 +47,17 @@ public class Client extends IOOperation implements Runnable {
         default:
           close(s);
       }
-      update();
-    } catch (IOException e)
-
-    {
-      System.out.println("Error 5" + e.getLocalizedMessage());
-      errors.add(e.getLocalizedMessage());
-      e.printStackTrace();
-
-
-    } catch (ClassNotFoundException e)
-
-    {
-      System.out.println("Error 6" + e.getMessage());
-      errors.add(e.getLocalizedMessage());
-      e.printStackTrace();
-
-
-    } catch (OperatorCreationException e)
-
-    {
-      System.out.println("Error 7" + e.getMessage());
-      errors.add(e.getLocalizedMessage());
-      e.printStackTrace();
-
-    } catch (CertException e)
-
-    {
-      System.out.println("Error 8" + e.getMessage());
-      errors.add(e.getLocalizedMessage());
-      e.printStackTrace();
-
-    } catch (InvalidKeySpecException e)
-
-    {
-      System.out.println("Error 9" + e.getMessage());
-      errors.add(e.getLocalizedMessage());
-      e.printStackTrace();
-
-    } catch (NoSuchAlgorithmException e)
-
-    {
-      System.out.println("Error 10" + e.getMessage());
-      errors.add(e.getLocalizedMessage());
-      e.printStackTrace();
-
-    } catch (InterruptedException e)
-
-    {
-      System.out.println("Error 11" + e.getMessage());
-      errors.add(e.getLocalizedMessage());
-      e.printStackTrace();
-
-    } catch (OperatorException e)
-
-    {
-      System.out.println("Error 11" + e.getMessage());
+    } catch (Exception e) {
       errors.add(e.getLocalizedMessage());
       e.printStackTrace();
     }
   }
 
-  //Create the session
+  /**
+   * Initiate the first step in the handshake
+   *
+   * @param s SocketHandler
+   */
   public void ack(SocketHandler s) throws IOException, ClassNotFoundException {
     //Instantiate the body of the response
     s.setNewBody();
@@ -121,7 +65,9 @@ public class Client extends IOOperation implements Runnable {
     write(s, false);
   }
 
-  //Send athentification code
+  /*
+   * Using protobuf
+   */
   public void sendCode(SocketHandler s, String[] authen) throws IOException, ClassNotFoundException {
     //Set the option of the response
     s.setOption(6);
@@ -158,7 +104,7 @@ public class Client extends IOOperation implements Runnable {
 
 
   public void connect(SocketHandler s, IHMConnexion serverDisplay)
-      throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, OperatorException, CertException, InterruptedException {
+      throws IOException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeySpecException, InterruptedException {
     //Set the public Key to decipher the code
     s.setPublicKey(maCle);
     //Check

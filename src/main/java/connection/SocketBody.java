@@ -1,7 +1,7 @@
-package Connection;
+package connection;
 
-import HomeSecurityLayer.Certificat;
-import HomeSecurityLayer.PaireClesRSA;
+import security.Certificat;
+import security.PaireClesRSA;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;

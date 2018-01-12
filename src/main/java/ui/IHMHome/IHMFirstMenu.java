@@ -1,6 +1,6 @@
-package Interfaces.IHMHome;
+package ui.IHMHome;
 
-import Component.Equipement;
+import component.Equipement;
 import java.util.Collection;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;

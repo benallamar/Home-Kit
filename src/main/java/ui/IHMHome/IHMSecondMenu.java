@@ -1,9 +1,6 @@
-package Interfaces.IHMHome;
+package ui.IHMHome;
 
-import Component.Equipement;
-
-import Connection.Client;
-import Interfaces.IHMConnexion;
+import component.Equipement;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;

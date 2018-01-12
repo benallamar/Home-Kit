@@ -1,8 +1,8 @@
-package Component;
+package component;
 
-import Connection.Server;
-import HomeSecurityLayer.Certificat;
-import Interfaces.IHMEquipement;
+import connection.Server;
+import security.Certificat;
+import ui.IHMEquipement;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.util.HashMap;

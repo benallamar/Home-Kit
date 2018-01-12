@@ -1,17 +1,10 @@
-package HomKit;
+package homekit;
 
-import Component.Equipement;
-import Console.JSONParser;
-import Interfaces.IHMHome.IHMHome;
-import Interfaces.IHMHome.Loading;
-import java.io.File;
+import component.Equipement;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
+import ui.IHMHome.IHMHome;
+import ui.IHMHome.Loading;
 
 /**
  * Project Name : TL_crypto
@@ -27,17 +20,7 @@ public class Home extends Thread implements Runnable {
 
   public void checkComponent() {
     try {
-      //TODO: Update the code of this page
-      List<File> filesInFolder = Files.walk(Paths.get("location_path"))
-          .filter(Files::isRegularFile)
-          .map(Path::toFile)
-          .collect(Collectors.toList());
-      int size = filesInFolder.size();
-      for (File file : filesInFolder) {
-        //We check if we don't already have this equipements
-        JSONParser.genrateEquipement(file.getName(), equipements);
-      }
-      loadPage.setValue(20);
+      //TODO: Remplement the components loader
     } catch (IOException e) {
       System.out.print(e.fillInStackTrace());
     }
@@ -59,9 +42,8 @@ public class Home extends Thread implements Runnable {
   }
 
   public void run() {
-
     if (!check_new_equi) {
-      //If is the first time we reolad the equipement
+      //TODO: Reimplement the runner code (optimize the generation of useless threads)
       loadPage = new Loading();
       checkComponent();
       homeInterface = new IHMHome(equipements);

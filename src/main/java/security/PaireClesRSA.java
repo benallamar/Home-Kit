@@ -1,4 +1,4 @@
-package HomeSecurityLayer;
+package security;
 
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.openssl.PEMParser;
@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.*;
-import java.security.interfaces.RSAKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -42,20 +41,11 @@ public class PaireClesRSA {
 
 
     public static String serialize(PaireClesRSA key) throws IOException {
-        PublicKey publicKey = key.pubKey();
-        StringWriter writer = new StringWriter();
-        PemWriter pemWriter = new PemWriter(writer);
-        pemWriter.writeObject(new PemObject("PUBLIC KEY", publicKey.getEncoded()));
-        pemWriter.flush();
-        pemWriter.close();
-        return writer.toString();
+        //TODO: Generate the serialize of the key
     }
 
     public static PublicKey deserialize(String pem_format) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
-        StringReader sr = new StringReader(pem_format);
-        PEMParser pr = new PEMParser(sr);
-        return KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(((SubjectPublicKeyInfo) pr.readObject()).getEncoded()));
-
+        //TODO: Generate the deserialize of the key
     }
 
 

@@ -1,6 +1,6 @@
-package Interfaces.IHMHome;
+package ui.IHMHome;
 
-import Component.Equipement;
+import component.Equipement;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.HashSet;

@@ -1,11 +1,9 @@
-package Console;
+package console;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 /**
  * Created by marouanebenalla on 12/10/2016.

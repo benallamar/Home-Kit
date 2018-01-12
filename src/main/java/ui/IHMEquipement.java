@@ -1,4 +1,4 @@
-package Interfaces;
+package ui;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -9,10 +9,8 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Collections;
 
-import Component.Equipement;
+import component.Equipement;
 
 /**
  * Project Name : TL_crypto

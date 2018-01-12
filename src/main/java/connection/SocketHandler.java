@@ -1,156 +1,159 @@
-package Connection;
+package connection;
 
-import HomeSecurityLayer.Certificat;
-import HomeSecurityLayer.PaireClesRSA;
-
-import java.io.*;
+import console.JSONParser;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-
-import Console.JSONParser;
+import security.Certificat;
+import security.PaireClesRSA;
 
 /**
- * Project Name : TL_crypto
+ * Handle the communication
  */
 public class SocketHandler {
-    protected Socket s;
-    protected OutputStream os = null;
-    protected ObjectOutputStream oos = null;
-    protected InputStream is = null;
-    protected ObjectInputStream ois = null;
-    protected SocketBody response;
-    protected SocketBody request;
 
-    public SocketHandler(Socket s, String name) {
-        this.s = s;
-        response = new SocketBody(name);
-    }
+  protected Socket s;
+  protected OutputStream os = null;
+  protected ObjectOutputStream oos = null;
+  protected InputStream is = null;
+  protected ObjectInputStream ois = null;
+  protected SocketBody response;
+  protected SocketBody request;
 
-    public SocketHandler(String host, int port, int serverPort, String name) throws IOException {
-        this.s = new Socket(host, serverPort);
-        response = new SocketBody(name);
-        setPorts(port, serverPort);
-    }
+  public SocketHandler(Socket s, String name) {
+    this.s = s;
+    response = new SocketBody(name);
+  }
 
-    public void write(PaireClesRSA key, boolean encrypt) throws IOException, ClassNotFoundException {
-        //response.debug();
-        os = s.getOutputStream();
-        oos = new ObjectOutputStream(os);
-        //We have to cypher the message before we send it.
-        //TODO: Add the PGP Protocol
-        String encryptedMessage = JSONParser.serialize(response);
-        if (encrypt) {
-            //String encryptedMessage = PGPMessage.signEncryptMessage();
-        }
-        oos.writeObject(encryptedMessage);
-        oos.flush();
-    }
+  public SocketHandler(String host, int port, int serverPort, String name) throws IOException {
+    this.s = new Socket(host, serverPort);
+    response = new SocketBody(name);
+    setPorts(port, serverPort);
+  }
 
-    public void read(PaireClesRSA key, boolean decrypt) throws IOException, ClassNotFoundException {
-        is = s.getInputStream();
-        ois = new ObjectInputStream(is);
-        //We have to decypher the gotten message
-        //TODO : Add the PGP protocol here
-        String decryptedMessage = (String) ois.readObject();
-        request = JSONParser.deserialize(decryptedMessage);
+  public void write(PaireClesRSA key, boolean encrypt) throws IOException, ClassNotFoundException {
+    //response.debug();
+    os = s.getOutputStream();
+    oos = new ObjectOutputStream(os);
+    //We have to cypher the message before we send it.
+    //TODO: Add the PGP Protocol
+    String encryptedMessage = JSONParser.serialize(response);
+    if (encrypt) {
+      //String encryptedMessage = PGPMessage.signEncryptMessage();
     }
+    oos.writeObject(encryptedMessage);
+    oos.flush();
+  }
 
-    public void close() throws IOException {
-        oos.close();
-        ois.close();
-        is.close();
-        os.close();
-        s.close();
-    }
+  public void read(PaireClesRSA key, boolean decrypt) throws IOException, ClassNotFoundException {
+    is = s.getInputStream();
+    ois = new ObjectInputStream(is);
+    //We have to decypher the gotten message
+    //TODO : Add the PGP protocol here
+    String decryptedMessage = (String) ois.readObject();
+    request = JSONParser.deserialize(decryptedMessage);
+  }
 
-    public void setPublicKey(PaireClesRSA key) throws IOException {
-        response.setPublicKey(key);
-    }
+  public void close() throws IOException {
+    oos.close();
+    ois.close();
+    is.close();
+    os.close();
+    s.close();
+  }
 
-    public void setHeader() {
-        response.setHeader(request);
-    }
+  public void setPublicKey(PaireClesRSA key) throws IOException {
+    response.setPublicKey(key);
+  }
 
-    public boolean isSuccess() {
-        return request.isSuccess();
-    }
+  public void setHeader() {
+    response.setHeader(request);
+  }
 
-    public String getSourceName() {
-        return request.getSourceName();
-    }
+  public boolean isSuccess() {
+    return request.isSuccess();
+  }
 
-    public int getFromPort() {
-        return request.getFromPort();
-    }
+  public String getSourceName() {
+    return request.getSourceName();
+  }
 
-    public String getSubject() {
-        return request.getSubject();
-    }
+  public int getFromPort() {
+    return request.getFromPort();
+  }
 
-    public PublicKey getPubKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        return request.getPubKey();
-    }
+  public String getSubject() {
+    return request.getSubject();
+  }
 
-    public void setOption(int option) {
-        response.setOption(option);
-    }
+  public PublicKey getPubKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    return request.getPubKey();
+  }
 
-    public void setSuccess() {
-        response.setSuccess();
-    }
+  public void setOption(int option) {
+    response.setOption(option);
+  }
 
-    public void setFailed() {
-        response.setFailed();
-    }
+  public void setSuccess() {
+    response.setSuccess();
+  }
 
-    public int getOption() {
-        return request.getOption();
-    }
+  public void setFailed() {
+    response.setFailed();
+  }
 
-    public void setNewBody() {
-        response.setNewBody();
-    }
+  public int getOption() {
+    return request.getOption();
+  }
 
-    public void setKey(String key, Object object) {
-        response.setKey(key, object);
-    }
+  public void setNewBody() {
+    response.setNewBody();
+  }
 
-    public Object getKey(String key) {
-        return request.getKey(key);
-    }
+  public void setKey(String key, Object object) {
+    response.setKey(key, object);
+  }
 
-    public boolean hasKey(String key) {
-        return request.hasKkey(key);
-    }
+  public Object getKey(String key) {
+    return request.getKey(key);
+  }
 
-    public void setCertificat(Certificat certificat) throws IOException {
-        response.setCertificat(certificat);
-    }
+  public boolean hasKey(String key) {
+    return request.hasKkey(key);
+  }
 
-    public void setPorts(int portSource, int portDestination) {
-        response.setFromPort(portSource);
-        response.setToPort(portDestination);
-    }
+  public void setCertificat(Certificat certificat) throws IOException {
+    response.setCertificat(certificat);
+  }
 
-    public Certificat getCertificat() throws IOException {
-        return request.getCertificat();
-    }
+  public void setPorts(int portSource, int portDestination) {
+    response.setFromPort(portSource);
+    response.setToPort(portDestination);
+  }
 
-    public void debug() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        response.debug();
-    }
+  public Certificat getCertificat() throws IOException {
+    return request.getCertificat();
+  }
 
-    public boolean hasPubKey() {
-        return request.hasPubKey();
-    }
+  public void debug() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    response.debug();
+  }
 
-    public boolean hasCertificat() {
-        return request.hasCertificat();
-    }
+  public boolean hasPubKey() {
+    return request.hasPubKey();
+  }
 
-    public void setSourceName(String s) {
-        response.setSourceName(s);
-    }
+  public boolean hasCertificat() {
+    return request.hasCertificat();
+  }
+
+  public void setSourceName(String s) {
+    response.setSourceName(s);
+  }
 }

@@ -1,8 +1,8 @@
-package Console;
+package console;
 
-import Component.Equipement;
-import Connection.SocketBody;
-import HomKit.Home;
+import component.Equipement;
+import connection.SocketBody;
+import homekit.Home;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import java.io.FileReader;

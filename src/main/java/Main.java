@@ -1,5 +1,4 @@
-import HomKit.Home;
-import Interfaces.IHMHome.IHMHome;
+import homekit.Home;
 
 public class Main {
     public static void main(String[] args) {

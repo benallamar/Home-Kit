@@ -1,14 +1,12 @@
-package Interfaces.IHMHome;
+package ui.IHMHome;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.HashMap;
 import java.util.HashSet;
 
-import Component.Equipement;
+import component.Equipement;
 
 /**
  * Project Name : TL_crypto

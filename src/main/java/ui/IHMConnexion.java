@@ -1,20 +1,14 @@
-package Interfaces;
+package ui;
 
-import Component.Equipement;
-import Connection.Client;
-import Connection.IOOperation;
-import Connection.SocketHandler;
+import connection.Client;
+import connection.IOOperation;
+import connection.SocketHandler;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.IOException;
-import java.net.Socket;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.concurrent.TimeUnit;
 
 public class IHMConnexion extends JFrame {
     private JPanel panelContent = new JPanel();
