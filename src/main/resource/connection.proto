@@ -1,0 +1,10 @@
+syntax = 'proto2';
+message Connection {
+  required string _id = 1;
+  required string _host = 2;
+  required string _token = 23;
+  message Body {
+    required string encryptedData = 3;
+    required string certificat = 3;
+  }
+}
